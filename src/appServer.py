@@ -1,11 +1,20 @@
 from flask import Flask
+from flask_restful import Resource, Api
 
 app = Flask(__name__)
+api = Api(app)
 
-@app.route("/")
-def hello():
-    return "<h1 style='color:blue'>Application Server</h1>"
+class ApplicationServer(Resource):
+    def get(self):
+        return 'Application Server api'
+
+class HomePage(Resource):
+    def get(self):
+        return 'Homepage'
+
+api.add_resource(HomePage, '/')
+api.add_resource(ApplicationServer, '/api')
 
 if __name__ == "__main__":
-    app.run(host='localhost')
+    app.run(host = 'localhost')
 
