@@ -12,7 +12,6 @@ configparser==3.5.0
 cryptography==1.2.3
 cvxopt==1.1.6
 cycler==0.9.0
-debtags==2.0
 decorator==4.0.10
 defer==1.0.6
 dirspec==13.10
