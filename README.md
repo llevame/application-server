@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/llevame/application-server.svg?branch=master)](https://travis-ci.org/llevame/application-server)
+
 # application-server
 
 Application Server para la aplicación Llevame
