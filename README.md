@@ -33,7 +33,7 @@ $ source venv/bin/activate
 (venv) $ pip install -r requirements.txt
 ```
 ```bash
-(venv) $ gunicorn --bind localhost:5000 wsgi:app -chdir src/
+(venv) $ gunicorn --bind localhost:5000 wsgi:app --chdir src/
 ```
 #### Tests y Coverage
 
