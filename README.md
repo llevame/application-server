@@ -13,23 +13,30 @@ Desarrollado en **Python**, con **Flask** como framework back-end y **Gunicorn**
 Se necesitan *python*, *pip*, y en particular *virtualenv*.
 Para descargarlo ejecutar:
 
-> $ sudo pip install virtualenv
-
+```bash
+$ sudo pip install virtualenv
+```
 
 #### Ejecución
 
-> $ virutalenv venv
-
+```bash
+$ virutalenv venv
+```
 - (usar este nombre que está agregado al .gitignore y no se subirá al realizar un *commit and push*)
 
-> $ source venv/bin/activate
-
+```bash
+$ source venv/bin/activate
+```
 - (se verá en el *promt* que se agrega entre paréntesis el nombre del directorio creado anteriormente)
 
-> (venv) $ pip install -r requirements.txt
-
-> (venv) $ gunicorn --bind localhost:5000 wsgi:app -chdir src/
-
+```bash
+(venv) $ pip install -r requirements.txt
+```
+```bash
+(venv) $ gunicorn --bind localhost:5000 wsgi:app -chdir src/
+```
 #### Tests y Coverage
 
-> (venv) $ pytest --cov-config .coveragerc --cov=$(pwd)
+```bash
+(venv) $ pytest --cov-config .coveragerc --cov=$(pwd)
+```
