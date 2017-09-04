@@ -10,32 +10,34 @@ Desarrollado en **Python**, con **Flask** como framework back-end y **Gunicorn**
 
 #### Dependencias
 
-Se necesitan *python*, *pip*, y en particular *virtualenv*.
-Para descargarlo ejecutar:
+Se debe tener instalado [Docker CE](https://store.docker.com/search?offering=community&type=edition) 
 
+En caso de exitir un error de permisos al ejecutar Docker, agregar al usuario al grupo para darle permisos:
 ```bash
-$ sudo pip install virtualenv
+$ sudo addgroup --system docker
+$ sudo adduser $USER docker
+$ newgrp docker
 ```
 
 #### Ejecución
 
+Primero se creara la imagen *appserver*, y luego se crea el container con el comando _run_
 ```bash
-$ virutalenv venv
+$ docker build -t appserver application-server/
+$ docker run appserver
 ```
-- (usar este nombre que está agregado al .gitignore y no se subirá al realizar un *commit and push*)
 
+Para poder configurar el IP address, se debe crear un bridge con el container anter de ejecutarlo:
 ```bash
-$ source venv/bin/activate
+$ docker network create --driver=bridge --subnet=192.168.0.0/24 --gateway=192.168.0.1 mynet
+$ docker run --net mynet --ip=192.168.0.10 appserver
 ```
-- (se verá en el *promt* que se agrega entre paréntesis el nombre del directorio creado anteriormente)
 
-```bash
-(venv) $ pip install -r requirements.txt
-```
-```bash
-(venv) $ gunicorn --bind localhost:5000 wsgi:app --chdir src/
-```
+Para corroborar se puede acceder a *192.168.0.10/5000* y ver la salida _Homepage_
+
 #### Tests y Coverage
+
+TODO: Update
 
 ```bash
 (venv) $ pytest --cov-config .coveragerc --cov=$(pwd)
