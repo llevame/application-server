@@ -1,18 +1,16 @@
 #TODO: Search if there is a better image
-FROM ubuntu
+FROM python:2.7
 
 COPY ./src /code
 COPY requirements.txt /code/config/requirements.txt
 COPY gunicorn-config.py /code/config/gunicorn-config.py
 
-RUN apt-get update
-RUN apt-get install -y \
-	python \
-	python-pip \
-	gunicorn
+RUN python -m pip install --upgrade pip
 
+RUN pip install --upgrade setuptools
+RUN pip install gunicorn --install-option="--install-scripts=$PWD/bin"
 RUN pip install -r /code/config/requirements.txt
 
 EXPOSE 5000
 
-CMD ["/usr/bin/gunicorn", "--config", "/code/config/gunicorn-config.py", "wsgi:app"]	
+CMD ["/bin/gunicorn", "--config", "/code/config/gunicorn-config.py", "wsgi:app"]	
