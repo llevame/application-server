@@ -4,7 +4,7 @@ python:
 services:
  - docker
 before_install:
- - docker build -t appserver application-server/
+ - docker build -t appserver .
  - docker network create --driver=bridge --subnet=192.168.0.0/24 --gateway=192.168.0.1 mynet
  - docker run --net mynet --ip=192.168.0.10 appserver
 script: 
