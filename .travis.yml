@@ -1,9 +1,12 @@
 language: python
 python:
- - "3.5"
+ - "2.7"
+services:
+ - docker
 before_install:
- - sudo apt-get update -qq
-install: "pip install -r requirements.txt"
+ - docker build -t appserver application-server/
+ - docker network create --driver=bridge --subnet=192.168.0.0/24 --gateway=192.168.0.1 mynet
+ - docker run --net mynet --ip=192.168.0.10 appserver
 script: 
  - pytest --cov-config .coveragerc --cov=$(pwd)
 after_success: codecov --token=$CODECOV_TOKE
