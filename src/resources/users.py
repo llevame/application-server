@@ -22,9 +22,9 @@ class UsersIds(Resource):
 
 class UsersIdsCars(Resource):
     def get(self, userId):
-        return 'GET request on' + prefix + '/' + str(userId)+ 'cars'
+        return 'GET request on ' + prefix + '/' + str(userId) + '/cars'
     def post(self, userId):
-        return 'POST request on' + prefix + '/' +  str(userId)+ 'cars'
+        return 'POST request on ' + prefix + '/' +  str(userId) + '/cars'
 
 class UsersIdsCarsIds(Resource):
     def get(self, userId, carId):
