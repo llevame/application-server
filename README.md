@@ -2,7 +2,7 @@
 
 [![Deploy](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy)
 
-https://llevame-applicationserver.herokuapp.com/api/v1/
+https://llevame-applicationserver.herokuapp.com/api/v1
 
 # application-server
 
