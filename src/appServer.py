@@ -1,6 +1,8 @@
 from flask import Flask
 from flask_restful import Resource, Api
 
+from resources.default import Default
+
 from resources.users import Users
 from resources.users import UsersValidate
 from resources.users import UsersIds
@@ -20,6 +22,9 @@ app = Flask(__name__)
 api = Api(app)
 
 prefix = "/api/v1"
+
+# Default endpoint
+api.add_resource(Default, prefix)
 
 # Users endpoints
 api.add_resource(Users, '{}/users'.format(prefix))
