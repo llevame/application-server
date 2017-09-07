@@ -1,0 +1,6 @@
+{
+  "name": "Llevame application-server",
+  "description": "A python + Flask + Gunicorn server for Llevame application",
+  "repository": "https://github.com/llevame/application-server",
+  "keywords": ["python", "flask", "gunicorn"]
+}
