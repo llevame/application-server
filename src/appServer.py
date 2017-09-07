@@ -43,5 +43,5 @@ api.add_resource(Paymethods, '{}/paymethods'.format(prefix))
 api.add_resource(ServersPing, '{}/servers/ping'.format(prefix))
 
 if __name__ == "__main__":
-    app.run(host = 'localhost')
+    app.run(debug=True)
 
