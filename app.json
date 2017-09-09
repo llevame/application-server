@@ -1,0 +1,7 @@
+{
+  "name": "Llevame application-server",
+  "description": "A python + Flask + Gunicorn server for Llevame application",
+  "repository": "https://github.com/llevame/application-server",
+  "website": "https://llevame-applicationserver.herokuapp.com/api/v1/",
+  "keywords": ["python", "flask", "gunicorn"]
+}
