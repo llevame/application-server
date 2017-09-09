@@ -21,19 +21,25 @@ $ newgrp docker
 
 #### Ejecución
 
-Primero se creara la imagen *appserver*, y luego se crea el container con el comando _run_
+Primero se creará la imagen *appserver*
 ```bash
 $ docker build -t appserver application-server/
-$ docker run appserver
 ```
 
-Para poder configurar el IP address, se debe crear un bridge con el container anter de ejecutarlo:
+Luego se crea (y ejecuta) el container *AppServer*. Para poder configurar el IP address, 
+se debe crear un bridge con el container anter de ejecutarlo:
 ```bash
 $ docker network create --driver=bridge --subnet=192.168.0.0/24 --gateway=192.168.0.1 mynet
-$ docker run --net mynet --ip=192.168.0.10 appserver
+$ docker run --net mynet --ip=192.168.0.10 --name AppServer appserver
 ```
 
-Para corroborar se puede acceder a *192.168.0.10/5000* y ver la salida _Homepage_
+Para corroborar que este corriendo, se puede acceder a *192.168.0.10/5000* y ver la salida _Homepage_
+
+A partir de este punto ya está creado el container AppServer, con la ip asociada. En caso de cerrarlo, 
+puede reiniciarse con el comando _start_
+```bash
+$ docker start AppServer
+```
 
 #### Tests y Coverage
 
