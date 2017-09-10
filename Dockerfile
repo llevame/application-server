@@ -7,6 +7,7 @@ RUN python -m pip install --upgrade pip
 
 RUN pip install --upgrade setuptools
 RUN pip install gunicorn --install-option="--install-scripts=$PWD/bin"
+RUN pip install -U pytest
 
 COPY requirements.txt .
 RUN pip install -r requirements.txt

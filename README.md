@@ -41,10 +41,8 @@ puede reiniciarse con el comando _start_
 $ docker start AppServer
 ```
 
-#### Tests y Coverage
-
-TODO: Update
+#### Tests
 
 ```bash
-(venv) $ pytest --cov-config .coveragerc --cov=$(pwd)
+docker exec AppServer pytest
 ```
