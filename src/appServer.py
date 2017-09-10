@@ -18,12 +18,16 @@ from resources.paymethods import Paymethods
 
 from resources.servers import ServersPing
 
+import logging
+
 app = Flask(__name__)
 api = Api(app)
 
 prefix = "/api/v1"
 
 # Default endpoint
+logging.basicConfig(filename='../logs/appServer.log', format='%(asctime)s , %(levelname)s : %(message)s' ,  level=logging.INFO)
+
 api.add_resource(Default, prefix)
 
 # Users endpoints
