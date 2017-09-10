@@ -8,8 +8,11 @@ Desarrollado en **Python**, con **Flask** como framework back-end y **Gunicorn**
 
 ### Correr Servidor
 
+Se recomienda el uso de Docker para evitar las diferencias que pudiera haber al instalar el ambiente.
+
 #### Dependencias
 
+## Docker
 Se debe tener instalado [Docker CE](https://store.docker.com/search?offering=community&type=edition) 
 
 En caso de exitir un error de permisos al ejecutar Docker, agregar al usuario al grupo para darle permisos:
@@ -19,8 +22,15 @@ $ sudo adduser $USER docker
 $ newgrp docker
 ```
 
+## Local - Configuracion del ambiente de desarrollo
+Se necesitan *python*, *pip*, y en particular *virtualenv*.
+```bash
+$ sudo pip install virtualenv
+```
+
 #### Ejecución
 
+## Docker
 Primero se creará la imagen *appserver*
 ```bash
 $ docker build -t appserver application-server/
@@ -41,8 +51,36 @@ puede reiniciarse con el comando _start_
 $ docker start AppServer
 ```
 
+## Local - Ejecucion en el ambiente de desarrollo
+Levantar la VM donde correra el servidor
+```bash
+$ virutalenv venv
+```
++ Evitar pushear el archivo generado a partir de la anterior ejecución
+ 
+```bash
+$ source venv/bin/activate
+```
++ Se abrirá en el *promt* con el nombre del directorio creado anteriormente entre paréntesis
+
+Instalar los requerimientos en la VM 
+```bash
+(venv) $ pip install -r requirements.txt
+```
+
+Finalmente ejecutar *gunicorn*, para corroborar se puede acceder a *localhost:5000* y ver la salida _Homepage_
+```bash
+(venv) $ gunicorn --bind localhost:5000 wsgi:app --chdir src/
+```
+
 #### Tests
 
+## Docker
 ```bash
 docker exec AppServer pytest
+```
+
+## Local - Ejecucion en el ambiente de desarrollo
+```bash
+(venv) $ pytest --cov-config .coveragerc --cov=$(pwd)
 ```
