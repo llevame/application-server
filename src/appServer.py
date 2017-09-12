@@ -18,10 +18,22 @@ from resources.paymethods import Paymethods
 
 from resources.servers import ServersPing
 
+import logging
+import os
+
 app = Flask(__name__)
 api = Api(app)
 
 prefix = "/api/v1"
+
+# logs
+if not os.path.exists("../logs"):
+    os.makedirs("../logs")
+
+log = open("../logs/appServer.log", "w")
+log.close()
+
+logging.basicConfig(filename='../logs/appServer.log', format='%(asctime)s , %(levelname)s : %(message)s' ,  level=logging.INFO)
 
 # Default endpoint
 api.add_resource(Default, prefix)
@@ -40,11 +52,9 @@ api.add_resource(TripsEstimate, '{}/trips/estimate'.format(prefix))
 api.add_resource(TripsIds, '{}/trips/<int:tripId>'.format(prefix))
 
 # Paymethods endpoints
-
 api.add_resource(Paymethods, '{}/paymethods'.format(prefix))
 
 # Servers endpoints
-
 api.add_resource(ServersPing, '{}/servers/ping'.format(prefix))
 
 if __name__ == "__main__":
