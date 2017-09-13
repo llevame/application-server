@@ -15,7 +15,7 @@ Se recomienda el uso de Docker para evitar las diferencias que pudiera haber al 
 #### Docker
 Se debe tener instalado [Docker CE](https://store.docker.com/search?offering=community&type=edition) 
 
-En caso de exitir un error de permisos al ejecutar Docker, agregar al usuario al grupo para darle permisos:
+En caso de existir un error de permisos al ejecutar Docker, agregar al usuario al grupo para darle permisos:
 ```bash
 $ sudo addgroup --system docker
 $ sudo adduser $USER docker
@@ -43,7 +43,7 @@ $ docker network create --driver=bridge --subnet=192.168.0.0/24 --gateway=192.16
 $ docker run --net mynet --ip=192.168.0.10 --name AppServer appserver
 ```
 
-Para corroborar que este corriendo, se puede acceder a *192.168.0.10/5000* y ver la salida _Homepage_
+Para corroborar que este corriendo, se puede acceder a *192.168.0.10:5000* y ver la salida _Homepage_
 
 A partir de este punto ya está creado el container AppServer, con la ip asociada. En caso de cerrarlo, 
 puede reiniciarse con el comando _start_
