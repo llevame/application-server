@@ -1,4 +1,7 @@
 from flask_restful import Resource
+from flask import jsonify
+from flask import request
+
 import logging
 
 prefix = "/api/v1/users"
@@ -31,6 +34,28 @@ class UsersIds(Resource):
     def delete(self, userId):
         logging.info('DELETE: %s/%s', prefix, userId)
         return 'DELETE request on ' + prefix + '/' + str(userId)
+
+class UsersIdsProfile(Resource):
+
+    def get(self, userId):
+        logging.info('GET: %s/%s', prefix, userId)
+        response = {'name': 'Nicolas' , 'lastname' : 'Alvarez'}
+        return jsonify(response)
+
+    def patch(self, userId):
+        logging.info('PATCH: %s/%s', prefix, userId)
+        #Init mocked data for user
+        user = {'name' : 'Nicolas', "lastname" : 'Alvarez' , 'address' : 'Donato Alvarez 2629' , 'userId' : userId}
+        #End mocked data for user
+        body = request.get_json()
+        try:
+            for key in body:
+                if key in user and key != 'userId' :
+                    user[key] = body[key]
+        except:
+            logging.error('Error parsing JSON:' + body)
+        return user
+
 
 class UsersIdsCars(Resource):
 
