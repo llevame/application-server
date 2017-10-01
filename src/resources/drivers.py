@@ -2,7 +2,7 @@ from flask_restful import Resource
 from flask import jsonify
 from flask import request
 
-prefix = "/api/v1/users"
+prefix = "/api/v1/drivers"
 
 import logging
 
@@ -18,29 +18,29 @@ class Drivers(Resource):
 
 class DriversIds(Resource):
 
-    def get(self, userId):
-        logging.info('GET: %s/%s', prefix, userId)
-        return 'GET request on ' + prefix + '/' + str(userId)
+    def get(self, driverId):
+        logging.info('GET: %s/%s', prefix, driverId)
+        return 'GET request on ' + prefix + '/' + str(driverId)
     
-    def put(self, userId):
-        logging.info('PUT: %s/%s', prefix, userId)
-        return 'PUT request on ' + prefix + '/' + str(userId)
+    def put(self, driverId):
+        logging.info('PUT: %s/%s', prefix, driverId)
+        return 'PUT request on ' + prefix + '/' + str(driverId)
     
-    def delete(self, userId):
-        logging.info('DELETE: %s/%s', prefix, userId)
-        return 'DELETE request on ' + prefix + '/' + str(userId)
+    def delete(self, driverId):
+        logging.info('DELETE: %s/%s', prefix, driverId)
+        return 'DELETE request on ' + prefix + '/' + str(driverId)
 
 class DriversIdsProfile(Resource):
 
-    def get(self, userId):
-        logging.info('GET: %s/%s', prefix, userId)
-        driver = {'name' : 'Nicolas', "lastname" : 'Alvarez' , 'carId' : 2134123 , 'driverId' : userId}
+    def get(self, driverId):
+        logging.info('GET: %s/%s', prefix, driverId)
+        driver = {'name' : 'Nicolas', "lastname" : 'Alvarez' , 'carId' : 2134123 , 'driverId' : driverId}
         return jsonify(driver)
 
-    def path(self, userId):
-        logging.info('PATCH: %s/%s', prefix, userId)
+    def patch(self, driverId):
+        logging.info('PATCH: %s/%s', prefix, driverId)
         #Init mocked data for driver
-        driver = {'name' : 'Nicolas', "lastname" : 'Alvarez' , 'carId' : 2134123 , 'driverId' : userId}
+        driver = {'name' : 'Nicolas', "lastname" : 'Alvarez' , 'carId' : 2134123 , 'driverId' : driverId}
         #End mocked data for drive
         body = request.get_json()
         try:
