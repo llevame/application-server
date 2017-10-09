@@ -1,6 +1,10 @@
 from flask_restful import Resource
 from flask import jsonify
 from flask import request
+from bson.json_util import loads
+from bson.objectid import ObjectId
+import llevameResponse
+from managers.dataBaseManager import DataBaseManager
 
 import logging
 
@@ -14,7 +18,15 @@ class Users(Resource):
     
     def post(self):
         logging.info('POST: %s', prefix)
-        return 'POST request on ' + prefix
+        db = DataBaseManager()
+        user = {}
+        body = request.get_json()
+        userId = db.postTo('users',[body])
+        if len(userId) == 1:
+            body['_id'] = str(body['_id'])
+            return llevameResponse.successResponse(body,200)
+        else:
+            return llevameResponse.errorResponse('Error inserting User', 400)
 
 class UsersValidate(Resource):
     def post(self):
@@ -25,7 +37,16 @@ class UsersIds(Resource):
 
     def get(self, userId):
         logging.info('GET: %s/%s', prefix, userId)
-        return 'GET request on ' + prefix + '/' + str(userId)
+        db = DataBaseManager()
+        user = db.getFrom('users',{'_id':ObjectId(userId)})
+        user = loads(user)
+        print(user)
+        if len(user) == 1:
+            user = user[0]
+            user['_id'] = userId
+            return llevameResponse.successResponse(user,200)
+        else:
+            return llevameResponse.errorResponse('Error finding User', 400)
     
     def put(self, userId):
         logging.info('PUT: %s/%s', prefix, userId)
@@ -40,7 +61,9 @@ class UsersIdsProfile(Resource):
     def get(self, userId):
         logging.info('GET: %s/%s', prefix, userId)
         response = {'name': 'Nicolas' , 'lastname' : 'Alvarez'}
-        return jsonify(response)
+        db = DataBaseManager()
+        user = db.getFrom('users',{'_id' : userId})
+        return jsonify(user)
 
     def patch(self, userId):
         logging.info('PATCH: %s/%s', prefix, userId)
