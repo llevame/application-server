@@ -1,7 +1,10 @@
 from pymongo import MongoClient
 from pymongo import errors
+from bson.objectid import ObjectId
 from bson.json_util import dumps
 from bson.json_util import loads
+
+import logging
 
 
 # WIP: DataBaseManager singleton
@@ -22,12 +25,13 @@ class DataBaseManager(object):
 		try:
 			collection = self.dataBase[collectionName]
 			matches = collection.find(matching)
+			logging.info("Getting document successfully")
 			return dumps(matches)
 		except errors.CollectionInvalid as e:
-			print "GET error: invalid collection"
+			logging.error('GET error: invalid collection')
 			return {}
 		except errors.OperationFailure as e:
-			print "GET error: " + e.errno + " " + e.strerror
+			logging.error('GET error: %s %s', e.errno, e.strerror)
 			return {}
 
 	# Post 'objects' to collection with 'collectionName'
@@ -37,11 +41,27 @@ class DataBaseManager(object):
 		try:
 			collection = self.dataBase[collectionName]
 			result = collection.insert_many(objects)
-			
+			logging.info("Document insertion dsuccessfull")
 			return result.inserted_ids
 		except errors.CollectionInvalid as e:
-			print "GET error: invalid collection"
+			logging.error('GET error: invalid collection')
 			return {}
 		except errors.OperationFailure as e:
-			print "GET error: " + e.errno + " " + e.strerror
+			logging.error('GET error: %s %s', e.errno, e.strerror)
+			return {}
+
+	# Update object with 'docId' to collection with 'collectionName' with 'uptadeData'
+	# collectionName: String. Name of the collection.
+	# objects: Dictionary with keys as properties on collection and values as wished
+	def update(self, collectionName, docId, updateData):
+		try:
+			collection = self.dataBase[collectionName]
+			result = collection.update_one({'_id': ObjectId(docId)}, {"$set": updateData}, upsert=False)
+			logging.info("Document updated successfully")
+			return result.upserted_id
+		except errors.CollectionInvalid as e:
+			logging.error('GET error: invalid collection')
+			return {}
+		except errors.OperationFailure as e:
+			logging.error('GET error: %s %s', e.errno, e.strerror)
 			return {}

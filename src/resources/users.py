@@ -26,6 +26,7 @@ class Users(Resource):
             body['_id'] = str(body['_id'])
             return llevameResponse.successResponse(body,200)
         else:
+            logging.error('POST: %s - Error inserting new user', prefix)
             return llevameResponse.errorResponse('Error inserting User', 400)
 
 class UsersValidate(Resource):
@@ -67,16 +68,15 @@ class UsersIdsProfile(Resource):
 
     def patch(self, userId):
         logging.info('PATCH: %s/%s', prefix, userId)
-        #Init mocked data for user
-        user = {'name' : 'Nicolas', "lastname" : 'Alvarez' , 'address' : 'Donato Alvarez 2629' , 'userId' : userId}
-        #End mocked data for user
+        db = DataBaseManager()
         body = request.get_json()
         try:
-            for key in body:
-                if key in user and key != 'userId' :
-                    user[key] = body[key]
+            userProfile = db.update('users',userId,body)
+            logging.info('User profile updated')
+            return llevameResponse.successResponse(userProfile,200)
         except:
-            logging.error('Error parsing JSON:' + body)
+            logging.error('Error updating user profile')
+            return llevameResponse.errorResponse('Error updating user profile', 400)
         return user
 
 
