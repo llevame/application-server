@@ -10,7 +10,8 @@ import logging
 # WIP: DataBaseManager singleton
 class DataBaseManager(object):
 	__instance = None
-	client = MongoClient('mongodb://localhost:27017/')
+	# client = MongoClient('mongodb://localhost:27017/')
+	client = MongoClient('mongodb://heroku_nlvr8zs7:go49l9vj5c0hob37jvsb693m9p@ds117605.mlab.com:17605/heroku_nlvr8zs7')
 	dataBase = client.project # Name of the data base
 
 	def __new__(cls):
