@@ -22,6 +22,7 @@ class Users(Resource):
         user = {}
         body = request.get_json()
         userId = db.postTo('users',[body])
+        
         if len(userId) == 1:
             body['_id'] = str(body['_id'])
             return llevameResponse.successResponse(body,200)
