@@ -4,8 +4,6 @@ from bson.objectid import ObjectId
 from bson.json_util import dumps
 from bson.json_util import loads
 
-import urllib.parse
-
 import logging
 
 
