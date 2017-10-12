@@ -14,20 +14,33 @@ class Users(Resource):
 
     def get(self):
         logging.info('GET: %s', prefix)
-        return 'GET request on ' + prefix
+        db = DataBaseManager()
+        try:
+            users = db.getFrom('users',{})
+            for user in users:
+                user["_id"] = str(user["_id"])
+            return llevameResponse.successResponse(users,200)
+        except:
+            logging.error('GET: %s - %s', sys.exc_info()[0],sys.exc_info()[1])
+            return llevameResponse.errorResponse('Error getting Users', 400)
     
     def post(self):
         logging.info('POST: %s', prefix)
         db = DataBaseManager()
         user = {}
         body = request.get_json()
-        userId = db.postTo('users',[body])
+
+        try:
+            userId = db.postTo('users',[body])
         
-        if len(userId) == 1:
-            body['_id'] = str(body['_id'])
-            return llevameResponse.successResponse(body,200)
-        else:
-            logging.error('POST: %s - Error inserting new user', prefix)
+            if len(userId) == 1:
+                body['_id'] = str(body['_id'])
+                return llevameResponse.successResponse(body,200)
+            else:
+                logging.error('POST: %s - Error inserting new user', prefix)
+                return llevameResponse.errorResponse('Error inserting User', 400)
+        except:
+            logging.error('POST: %s - %s', sys.exc_info()[0],sys.exc_info()[1])
             return llevameResponse.errorResponse('Error inserting User', 400)
 
 class UsersValidate(Resource):
@@ -42,8 +55,6 @@ class UsersIds(Resource):
         db = DataBaseManager()
         try:
             user = db.getFrom('users',{'_id':ObjectId(userId)})
-            user = loads(user)
-            print(user)
             if len(user) == 1:
                 user = user[0]
                 user['_id'] = userId
@@ -51,6 +62,7 @@ class UsersIds(Resource):
             else:
                 return llevameResponse.errorResponse('Error finding User', 400)
         except:
+            logging.error('GET: %s - %s', sys.exc_info()[0],sys.exc_info()[1])
             return llevameResponse.errorResponse('Error finding User', 400)
     def put(self, userId):
         logging.info('PUT: %s/%s', prefix, userId)
@@ -64,10 +76,18 @@ class UsersIdsProfile(Resource):
 
     def get(self, userId):
         logging.info('GET: %s/%s', prefix, userId)
-        response = {'name': 'Nicolas' , 'lastname' : 'Alvarez'}
         db = DataBaseManager()
-        user = db.getFrom('users',{'_id' : ObjectId(userId)})
-        return jsonify(user)
+        try:
+            user = db.getFrom('users',{'_id' : ObjectId(userId)})
+            if len(user) == 1:
+                user = user[0]
+                user['_id'] = userId
+                return llevameResponse.successResponse(user,200)
+            else:
+                return llevameResponse.errorResponse('Error finding User', 400)
+        except:
+            logging.error('GET: %s - %s', sys.exc_info()[0],sys.exc_info()[1])
+            return llevameResponse.errorResponse('Error finding User', 400)
 
     def patch(self, userId):
         logging.info('PATCH: %s/%s', prefix, userId)
@@ -78,9 +98,9 @@ class UsersIdsProfile(Resource):
             logging.info('User profile updated')
             return llevameResponse.successResponse(userProfile,200)
         except:
-            logging.error('Error updating user profile')
+            logging.error('PATCH: %s - %s', sys.exc_info()[0],sys.exc_info()[1])
             return llevameResponse.errorResponse('Error updating user profile', 400)
-        return user
+
 
 
 class UsersIdsCars(Resource):

@@ -59,8 +59,8 @@ api.add_resource(TripsIds, '{}/trips/<int:tripId>'.format(prefix))
 
 # Drivers endpoints
 api.add_resource(Drivers, '{}/drivers'.format(prefix))
-api.add_resource(DriversIds, '{}/drivers/<int:driverId>'.format(prefix))
-api.add_resource(DriversIdsProfile, '{}/drivers/<int:driverId>/profile'.format(prefix))
+api.add_resource(DriversIds, '{}/drivers/<string:driverId>'.format(prefix))
+api.add_resource(DriversIdsProfile, '{}/drivers/<string:driverId>/profile'.format(prefix))
 
 # Paymethods endpoints
 api.add_resource(Paymethods, '{}/paymethods'.format(prefix))
