@@ -11,8 +11,10 @@ import logging
 class DataBaseManager(object):
 	__instance = None
 	# client = MongoClient('mongodb://localhost:27017/')
-	client = MongoClient('mongodb://dymloz:twinkltwinkl1@heroku_nlvr8zs7:go49l9vj5c0hob37jvsb693m9p@ds117605.mlab.com:17605/heroku_nlvr8zs7')
-	dataBase = client.project # Name of the data base
+
+	client = MongoClient('mongodb://dymlozRead:twinkltwinkl2@ds117605.mlab.com:17605/heroku_nlvr8zs7')
+
+	dataBase = client.heroku_nlvr8zs7 # Name of the data base
 
 	def __new__(cls):
 		if DataBaseManager.__instance is None:
@@ -27,12 +29,12 @@ class DataBaseManager(object):
 			collection = self.dataBase[collectionName]
 			matches = collection.find(matching)
 			logging.info("Getting document successfully")
-			return dumps(matches)
+			return loads(dumps(matches))
 		except errors.CollectionInvalid as e:
 			logging.error('GET error: invalid collection')
 			return {}
 		except errors.OperationFailure as e:
-			logging.error('GET error: %s %s', e.errno, e.strerror)
+			logging.error('GET error: %s', e.details)
 			return {}
 
 	# Post 'objects' to collection with 'collectionName'
@@ -48,7 +50,7 @@ class DataBaseManager(object):
 			logging.error('GET error: invalid collection')
 			return {}
 		except errors.OperationFailure as e:
-			logging.error('GET error: %s %s', e.errno, e.strerror)
+			logging.error('GET error: %s', e.details)
 			return {}
 
 	# Update object with 'docId' to collection with 'collectionName' with 'uptadeData'
@@ -64,5 +66,5 @@ class DataBaseManager(object):
 			logging.error('GET error: invalid collection')
 			return {}
 		except errors.OperationFailure as e:
-			logging.error('GET error: %s %s', e.errno, e.strerror)
+			logging.error('GET error: %s', e.details)
 			return {}
