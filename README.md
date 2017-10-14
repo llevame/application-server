@@ -26,11 +26,19 @@ $ sudo adduser $USER docker
 $ newgrp docker
 ```
 
+A su vez, instalar *docker-compose* para poder hacer la conexion con la base de datos
+```bash
+$ sudo pip install docker-compose	
+```
+
 #### Local - Configuración del ambiente de desarrollo
-Se necesitan *python*, *pip*, y en particular *virtualenv*.
+Se necesitan *python*, *pip*.
+Para ejecutar el servidor se utilizará *virtualenv*, y para la base de datos deberá tener *mongo*:
 ```bash
 $ sudo pip install virtualenv
+$ sudo apt install mongodb
 ```
+
 
 ### Ejecución
 
@@ -55,9 +63,18 @@ puede reiniciarse con el comando _start_
 $ docker start AppServer
 ```
 
-#### Local - Ejecución en el ambiente de desarrollo
-Levantar la VM donde correrá el servidor
+Para poder ejecutar con la base de datos, debe estar a la altura del archivo *docker-compose.yml* y ejecutar 
+los siguientes comandos, con la imagen del appserver ya creada:
 ```bash
+$ docker-compose up
+```
+Para corroborar que este corriendo, se puede acceder a *localhost:5000* y ver la salida _Homepage_
+
+
+#### Local - Ejecución en el ambiente de desarrollo
+Inicialmente comenzar el proceso de mongo, y luego levantar la VM donde correrá el servidor
+```bash
+$ mongod
 $ virutalenv venv
 ```
 + Evitar pushear el archivo generado a partir de la anterior ejecución (si se usa **venv** este ya está agregado al .gitignore)
