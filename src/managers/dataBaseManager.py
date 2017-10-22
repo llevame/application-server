@@ -12,7 +12,7 @@ class DataBaseManager(object):
 	__instance = None
 	# client = MongoClient('mongodb://localhost:27017/')
 
-	client = MongoClient('mongodb://dymlozRead:twinkltwinkl2@ds117605.mlab.com:17605/heroku_nlvr8zs7')
+	client = MongoClient('mongodb://dymloz:twinkltwinkl1@ds117605.mlab.com:17605/heroku_nlvr8zs7')
 
 	dataBase = client.heroku_nlvr8zs7 # Name of the data base
 
@@ -47,10 +47,10 @@ class DataBaseManager(object):
 			logging.info("Document insertion dsuccessfull")
 			return result.inserted_ids
 		except errors.CollectionInvalid as e:
-			logging.error('GET error: invalid collection')
+			logging.error('POST error: invalid collection')
 			return {}
 		except errors.OperationFailure as e:
-			logging.error('GET error: %s', e.details)
+			logging.error('POST error: %s', e.details)
 			return {}
 
 	# Update object with 'docId' to collection with 'collectionName' with 'uptadeData'
@@ -63,8 +63,8 @@ class DataBaseManager(object):
 			logging.info("Document updated successfully")
 			return result.upserted_id
 		except errors.CollectionInvalid as e:
-			logging.error('GET error: invalid collection')
+			logging.error('UPDATE error: invalid collection')
 			return {}
 		except errors.OperationFailure as e:
-			logging.error('GET error: %s', e.details)
+			logging.error('UPDATE error: %s', e.details)
 			return {}
