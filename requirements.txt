@@ -27,6 +27,7 @@ itsdangerous==0.24
 Jinja2==2.8
 MarkupSafe==0.23
 virtualenv==15.1.0
+passlib==1.7.1
 py==1.4.34
 pyparsing==2.0.3
 pyserial==3.0.1
