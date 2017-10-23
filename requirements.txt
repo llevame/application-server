@@ -18,6 +18,7 @@ entrypoints==0.2.2
 fastimport==0.9.4
 Flask==0.12.2
 Flask-RESTful==0.3.6
+Flask-HTTPAuth==3.2.3
 gunicorn==19.7.1
 html5lib==0.999
 httplib2==0.9.1
