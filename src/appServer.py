@@ -46,7 +46,7 @@ logging.basicConfig(filename='../logs/appServer.log', format='%(asctime)s , %(le
 api.add_resource(Default, prefix)
 
 # Account endpoints
-api.add_resource(Account, '{}/account/<string:username>/<string:password>'.format(prefix))
+api.add_resource(Account, '{}/account/<string:username>'.format(prefix))
 
 # Users endpoints
 api.add_resource(Users, '{}/users'.format(prefix))

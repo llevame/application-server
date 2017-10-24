@@ -61,28 +61,30 @@ class Account(Resource):
 		return False
 
 	@auth.login_required
-	def put(self, username, password):
+	def put(self, username):
 		return llevameResponse.successResponse({"username":"nicolas", "password":"1234"}, 200)
 
-	# Login user with password
-	def get(self, username, password):
-		logging.info('GET: %s/%s/%s', prefix, username, password)
+	# Login user
+	def get(self, username):
+		logging.info('GET: %s/%s', prefix, username)
 		db = DataBaseManager()
+		body = request.get_json()
 		try:
 			user = db.getFrom('users',{'username':username})
 			if len(user) == 1:
 				user = user[0]
-				# Refresh token for user
-				newToken = Account().getToken(user['username'])
-				db.update('users', user['_id'], {'token': newToken})
-
-				user["_id"] = str(user["_id"])
-				user["token"] = newToken
-
 				hashPass = user['password']
-				user.pop('password') 	# Remove key from response
+				password = body['password']
 
 				if self.verifyPass(hashPass, password):
+					# Refresh token for user
+					newToken = Account().getToken(user['username'])
+					db.update('users', user['_id'], {'token': newToken})
+
+					user["_id"] = str(user["_id"])
+					user["token"] = newToken
+					user.pop('password') 	# Remove key from response
+
 					dataResponse = {'user': user}
 					return llevameResponse.successResponse(dataResponse,200)
 
@@ -94,8 +96,8 @@ class Account(Resource):
 			return llevameResponse.errorResponse('Error Login User', 400)
 
 	# Sign up user
-	def post(self, username, password):
-		logging.info('POST: %s/%s/%s', prefix, username)
+	def post(self, username):
+		logging.info('POST: %s/%s', prefix, username)
 		db = DataBaseManager()
 		body = request.get_json()
 		try:
@@ -103,13 +105,13 @@ class Account(Resource):
 			if len(user) >= 1:
 				return llevameResponse.errorResponse('User already exists', 400)
 			else:
-				passw = body['password']
-				if passw.len() == 0:
-					logging.error('Sign up user: invalid password %s', passw)
+				password = body['password']
+				if password.len() == 0:
+					logging.error('Sign up user: invalid password %s', password)
 					return llevameResponse.errorResponse('Invalid password', 203)
 
-				hashPass = self.getHashPassword(passw)
-				if self.verifyPass(hashPass, passw):
+				hashPass = self.getHashPassword(password)
+				if self.verifyPass(hashPass, password):
 					body['token'] = Account().getToken(username)
 					body['username'] = username
 					body['password'] = hashPass
