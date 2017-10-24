@@ -1,8 +1,6 @@
 from flask_restful import Resource
 from flask import jsonify
 from flask import request
-#from flask_httpauth import HTTPBasicAuth
-from flask_httpauth import HTTPTokenAuth
 
 from bson.json_util import loads
 from bson.objectid import ObjectId
@@ -12,12 +10,13 @@ from managers.dataBaseManager import DataBaseManager
 from passlib.hash import sha256_crypt
 from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
 
+from managers.authManager import Authorization
+
 import logging
 import sys
 
 prefix = "/api/v1/account"
-#auth = HTTPBasicAuth()
-auth = HTTPTokenAuth()
+auth = Authorization().auth
 
 AppKey = "asdasdadsasdasd"
 
@@ -26,7 +25,6 @@ class Account(Resource):
 	def getHashPassword(self, password):
 		return sha256_crypt.encrypt(password)
 
-	#    @auth.verify_password
 	def verifyPassword(username, password):
 		logging.info('verify password: %s/%s', username, password)
 		db = DataBaseManager()
@@ -46,19 +44,6 @@ class Account(Resource):
 
 	def getToken(self, username):
 		return Serializer(AppKey, 3600).dumps({'username': username})
-
-	@auth.verify_token
-	def verifyToken(token):
-		logging.info('verify token: %s', token)
-		db = DataBaseManager()
-		user = db.getFrom('users',{'token':token})
-		print(user)
-		if len(user) == 1:
-			logging.info('User found')
-			return True
-
-		logging.info('User not found')
-		return False
 
 	@auth.login_required
 	def put(self, username):
