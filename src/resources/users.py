@@ -5,13 +5,18 @@ from bson.json_util import loads
 from bson.objectid import ObjectId
 from . import llevameResponse
 from managers.dataBaseManager import DataBaseManager
+from managers.authManager import Authorization
+
 
 import logging
+import sys
 
 prefix = "/api/v1/users"
+auth = Authorization().auth
 
 class Users(Resource):
 
+    @auth.login_required
     def get(self):
         logging.info('GET: %s', prefix)
         db = DataBaseManager()

@@ -3,6 +3,8 @@ from flask_restful import Resource, Api
 
 from resources.default import Default
 
+from resources.account import Account
+
 from resources.users import Users
 from resources.users import UsersValidate
 from resources.users import UsersIds
@@ -42,6 +44,9 @@ logging.basicConfig(filename='../logs/appServer.log', format='%(asctime)s , %(le
 
 # Default endpoint
 api.add_resource(Default, prefix)
+
+# Account endpoints
+api.add_resource(Account, '{}/account/<string:username>'.format(prefix))
 
 # Users endpoints
 api.add_resource(Users, '{}/users'.format(prefix))
