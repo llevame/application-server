@@ -64,13 +64,9 @@ class Account(Resource):
 				if self.verifyPass(hashPass, password):
 					# Refresh token for user
 					newToken = Account().getToken(user['username'])
-					db.update('users', user['_id'], {'token': newToken})
+					db.update('users', str(user["_id"]), {'token': newToken})
 
-					user["_id"] = str(user["_id"])
-					user["token"] = newToken
-					user.pop('password') 	# Remove key from response
-
-					dataResponse = {'user': user}
+					dataResponse = {'token': newToken}
 					return llevameResponse.successResponse(dataResponse,200)
 
 				return llevameResponse.errorResponse('Invalid password', 401)
@@ -102,9 +98,7 @@ class Account(Resource):
 					body['password'] = hashPass
 					userId = db.postTo('users',[body])
 					if len(userId) > 0:
-						user = db.getFrom('users',{'_id':userId})
-						user.pop('password') 	# Remove key from response
-						dataResponse = {'user': user}
+						dataResponse = {'token': body['token']}
 						return llevameResponse.successResponse(dataResponse,200)
 					else:
 						logging.error('Sign up user: cant post new user %s', username)

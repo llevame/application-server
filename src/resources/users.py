@@ -23,12 +23,14 @@ class Users(Resource):
         try:
             users = db.getFrom('users',{})
             for user in users:
-                user["_id"] = str(user["_id"])
+                user.pop("_id")
+                user.pop("password")
             return llevameResponse.successResponse(users,200)
         except:
             logging.error('GET: %s - %s', sys.exc_info()[0],sys.exc_info()[1])
             return llevameResponse.errorResponse('Error getting Users', 400)
     
+""" Do not allow users to create others
     def post(self):
         logging.info('POST: %s', prefix)
         db = DataBaseManager()
@@ -47,6 +49,7 @@ class Users(Resource):
         except:
             logging.error('POST: %s - %s', sys.exc_info()[0],sys.exc_info()[1])
             return llevameResponse.errorResponse('Error inserting User', 400)
+"""
 
 class UsersValidate(Resource):
     def post(self):
@@ -55,20 +58,23 @@ class UsersValidate(Resource):
 
 class UsersIds(Resource):
 
+    @auth.login_required
     def get(self, userId):
         logging.info('GET: %s/%s', prefix, userId)
         db = DataBaseManager()
         try:
-            user = db.getFrom('users',{'_id':ObjectId(userId)})
+            user = db.getFrom('users',{'username':userId})
             if len(user) == 1:
                 user = user[0]
-                user['_id'] = userId
+                user.pop("_id")
+                user.pop("password")
                 return llevameResponse.successResponse(user,200)
             else:
                 return llevameResponse.errorResponse('Error finding User', 400)
         except:
             logging.error('GET: %s - %s', sys.exc_info()[0],sys.exc_info()[1])
             return llevameResponse.errorResponse('Error finding User', 400)
+
     def put(self, userId):
         logging.info('PUT: %s/%s', prefix, userId)
         return 'PUT request on ' + prefix + '/' + str(userId)
@@ -77,16 +83,19 @@ class UsersIds(Resource):
         logging.info('DELETE: %s/%s', prefix, userId)
         return 'DELETE request on ' + prefix + '/' + str(userId)
 
+
 class UsersIdsProfile(Resource):
 
+    @auth.login_required
     def get(self, userId):
         logging.info('GET: %s/%s', prefix, userId)
         db = DataBaseManager()
         try:
-            user = db.getFrom('users',{'_id' : ObjectId(userId)})
+            user = db.getFrom('users',{'username':userId})
             if len(user) == 1:
                 user = user[0]
-                user['_id'] = userId
+                user.pop("_id")
+                user.pop("password")
                 return llevameResponse.successResponse(user,200)
             else:
                 return llevameResponse.errorResponse('Error finding User', 400)
@@ -94,14 +103,22 @@ class UsersIdsProfile(Resource):
             logging.error('GET: %s - %s', sys.exc_info()[0],sys.exc_info()[1])
             return llevameResponse.errorResponse('Error finding User', 400)
 
+    @auth.login_required
     def patch(self, userId):
         logging.info('PATCH: %s/%s', prefix, userId)
         db = DataBaseManager()
         body = request.get_json()
         try:
-            userProfile = db.update('users',userId,body)
-            logging.info('User profile updated')
-            return llevameResponse.successResponse(userProfile,200)
+            user = db.getFrom('users',{'username':userId})
+            if len(user) == 1:
+                user = user[0]
+                user.pop("_id")
+                user.pop("password")
+                userProfile = db.update('users', str(user["_id"]),body)
+                logging.info('User profile updated')
+                return llevameResponse.successResponse(userProfile,200)
+            else:
+                return llevameResponse.errorResponse('Error finding User', 400)
         except:
             logging.error('PATCH: %s - %s', sys.exc_info()[0],sys.exc_info()[1])
             return llevameResponse.errorResponse('Error updating user profile', 400)
