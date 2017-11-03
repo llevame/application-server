@@ -23,33 +23,14 @@ class Users(Resource):
         try:
             users = db.getFrom('users',{})
             for user in users:
-                user.pop("_id")
-                user.pop("password")
+                user.pop("_id", None)
+                user.pop("password", None)
+                user.pop("token", None)
             return llevameResponse.successResponse(users,200)
         except:
             logging.error('GET: %s - %s', sys.exc_info()[0],sys.exc_info()[1])
             return llevameResponse.errorResponse('Error getting Users', 400)
     
-""" Do not allow users to create others
-    def post(self):
-        logging.info('POST: %s', prefix)
-        db = DataBaseManager()
-        user = {}
-        body = request.get_json()
-
-        try:
-            userId = db.postTo('users',[body])
-        
-            if len(userId) == 1:
-                body['_id'] = str(body['_id'])
-                return llevameResponse.successResponse(body,200)
-            else:
-                logging.error('POST: %s - Error inserting new user', prefix)
-                return llevameResponse.errorResponse('Error inserting User', 400)
-        except:
-            logging.error('POST: %s - %s', sys.exc_info()[0],sys.exc_info()[1])
-            return llevameResponse.errorResponse('Error inserting User', 400)
-"""
 
 class UsersValidate(Resource):
     def post(self):
@@ -66,8 +47,9 @@ class UsersIds(Resource):
             user = db.getFrom('users',{'username':userId})
             if len(user) == 1:
                 user = user[0]
-                user.pop("_id")
-                user.pop("password")
+                user.pop("_id", None)
+                user.pop("password", None)
+                user.pop("token", None)
                 return llevameResponse.successResponse(user,200)
             else:
                 return llevameResponse.errorResponse('Error finding User', 400)
@@ -94,8 +76,9 @@ class UsersIdsProfile(Resource):
             user = db.getFrom('users',{'username':userId})
             if len(user) == 1:
                 user = user[0]
-                user.pop("_id")
-                user.pop("password")
+                user.pop("_id", None)
+                user.pop("password", None)
+                user.pop("token", None)
                 return llevameResponse.successResponse(user,200)
             else:
                 return llevameResponse.errorResponse('Error finding User', 400)
@@ -112,8 +95,9 @@ class UsersIdsProfile(Resource):
             user = db.getFrom('users',{'username':userId})
             if len(user) == 1:
                 user = user[0]
-                user.pop("_id")
-                user.pop("password")
+                user.pop("_id", None)
+                user.pop("password", None)
+                user.pop("token", None)
                 userProfile = db.update('users', str(user["_id"]),body)
                 logging.info('User profile updated')
                 return llevameResponse.successResponse(userProfile,200)
