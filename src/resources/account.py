@@ -73,7 +73,7 @@ class Account(Resource):
 						return llevameResponse.successResponse(dataResponse,200)
 					return llevameResponse.errorResponse('Invalid password', 401)
 
-				elif len(user['token']) > 0:
+				elif len(user['fb_token']) > 0:
 					# Facebook user
 					newToken = Account().getToken(user['username'])
 					isDriver = user['isDriver']
@@ -101,8 +101,10 @@ class Account(Resource):
 				return llevameResponse.errorResponse('User already exists', 400)
 			else:
 				if (not body['password']) or (len(body['password']) == 0):
-					logging.error('Sign up user: invalid password')
-					return llevameResponse.errorResponse('Password is mandatory', 203)
+					if not body['fb_token']:
+						logging.error('Sign up user: invalid password')
+						return llevameResponse.errorResponse('Password is mandatory', 203)
+				
 				if not body['isDriver']:
 					logging.error('Sign up user: invalid driver info')
 					return llevameResponse.errorResponse('isDriver is mandatory', 203)
