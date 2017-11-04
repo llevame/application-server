@@ -53,7 +53,6 @@ class Account(Resource):
 		body = request.json
 		logging.info('PATCH: %s/%s - body: %s', prefix, username, str(body))
 		try:
-			a = body["asdasd"]
 			user = DataBaseManager().getFrom('users',{'username':username})
 			if len(user) == 1:
 				return self.loginPassenger(user[0], body)
