@@ -53,6 +53,7 @@ class Account(Resource):
 		body = request.json
 		logging.info('PATCH: %s/%s - body: %s', prefix, username, str(body))
 		try:
+			a = body["asdasd"]
 			user = DataBaseManager().getFrom('users',{'username':username})
 			if len(user) == 1:
 				return self.loginPassenger(user[0], body)
@@ -64,8 +65,9 @@ class Account(Resource):
 			return llevameResponse.errorResponse('Error finding User', 400)
 
 		except:
-			logging.error('GET: %s - %s', sys.exc_info()[0],sys.exc_info()[1])
-			return llevameResponse.errorResponse('Error Login User', 400)
+			error = 'GET' + str(sys.exc_info()[0]) + "-" + str(sys.exc_info()[1])
+			logging.error(error)
+			return llevameResponse.errorResponse(error, 400)
 
 
 	def loginPassenger(self, user, body):
@@ -137,8 +139,9 @@ class Account(Resource):
 				return self.signUpPassenger(username, body)
 
 		except:
-			logging.error('POST: %s - %s', sys.exc_info()[0],sys.exc_info()[1])
-			return llevameResponse.errorResponse('Error Sign Up User', 400)
+			error = 'POST' + str(sys.exc_info()[0]) + "-" + str(sys.exc_info()[1])
+			logging.error(error)
+			return llevameResponse.errorResponse(error, 400)
 
 
 	def signUpPassenger(self, username, body):
