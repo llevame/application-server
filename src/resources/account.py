@@ -84,7 +84,7 @@ class Account(Resource):
 				newToken = Account().getToken(user['username'])
 				DataBaseManager().update('users', str(user["_id"]), {'token': newToken})
 
-				dataResponse = {'token': newToken, 'isDriver': 0}
+				dataResponse = {'token': newToken, 'isDriver': False}
 				return llevameResponse.successResponse(dataResponse,200)
 			return llevameResponse.errorResponse('Wrong password', 401)
 
@@ -94,7 +94,7 @@ class Account(Resource):
 				newToken = Account().getToken(user['username'])
 				DataBaseManager().update('users', str(user["_id"]), {'token': newToken})
 
-				dataResponse = {'token': newToken, 'isDriver': 0}
+				dataResponse = {'token': newToken, 'isDriver': False}
 				return llevameResponse.successResponse(dataResponse,200)
 			return llevameResponse.errorResponse('Invalid facebook token', 401)
 
@@ -115,7 +115,7 @@ class Account(Resource):
 				newToken = Account().getToken(user['username'])
 				DataBaseManager().update('drivers', str(user["_id"]), {'token': newToken})
 
-				dataResponse = {'token': newToken, 'isDriver': 1}
+				dataResponse = {'token': newToken, 'isDriver': True}
 				return llevameResponse.successResponse(dataResponse,200)
 			return llevameResponse.errorResponse('Wrong password', 401)
 
