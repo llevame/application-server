@@ -79,6 +79,7 @@ class UsersIdsProfile(Resource):
                 user.pop("_id", None)
                 user.pop("password", None)
                 user.pop("token", None)
+                user.pop("fb_token", None)
                 return llevameResponse.successResponse(user,200)
             else:
                 return llevameResponse.errorResponse('Error finding User', 400)
@@ -95,10 +96,9 @@ class UsersIdsProfile(Resource):
             user = db.getFrom('users',{'username':userId})
             if len(user) == 1:
                 user = user[0]
-                user.pop("_id", None)
-                user.pop("password", None)
-                user.pop("token", None)
                 userProfile = db.update('users', str(user["_id"]),body)
+                userProfile.pop("_id", None)
+                userProfile.pop("password", None)
                 logging.info('User profile updated')
                 return llevameResponse.successResponse(userProfile,200)
             else:
