@@ -58,9 +58,13 @@ class Account(Resource):
 			user = db.getFrom('users',{'username':username})
 			if len(user) == 1:
 				user = user[0]
-				if len(user['password']) > 0:
+				if user['password']:
 					# Regular user
 					hashPass = user['password']
+					if not body['password']:
+						logging.error('login user: password not found')
+						return llevameResponse.errorResponse('Wrong password', 401)
+
 					password = body['password']
 
 					if self.verifyPass(hashPass, password):
@@ -71,9 +75,9 @@ class Account(Resource):
 
 						dataResponse = {'token': newToken, 'isDriver': isDriver}
 						return llevameResponse.successResponse(dataResponse,200)
-					return llevameResponse.errorResponse('Invalid password', 401)
+					return llevameResponse.errorResponse('Wrong password', 401)
 
-				elif len(user['fb_token']) > 0:
+				elif user['fb_token'] and len(user['fb_token']) > 0:
 					# Facebook user
 					newToken = Account().getToken(user['username'])
 					isDriver = user['isDriver']
@@ -104,7 +108,7 @@ class Account(Resource):
 					if not body['fb_token']:
 						logging.error('Sign up user: invalid password')
 						return llevameResponse.errorResponse('Password is mandatory', 203)
-				
+
 				if not body['isDriver']:
 					logging.error('Sign up user: invalid driver info')
 					return llevameResponse.errorResponse('isDriver is mandatory', 203)
@@ -115,6 +119,7 @@ class Account(Resource):
 					body['token'] = Account().getToken(username)
 					body['username'] = username
 					body['password'] = hashPass
+
 					userId = db.postTo('users',[body])
 					if len(userId) > 0:
 						logging.info('POST: %s/%s - user created', prefix, username)
