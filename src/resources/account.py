@@ -47,7 +47,7 @@ class Account(Resource):
 
 
 	def put(self, username):
-		return llevameResponse.successResponse({"test":"test"},200)
+		return llevameResponse.successResponse({"test":"test", "otro":True},200)
 
 	# Login user -> updates token
 	def patch(self, username):
