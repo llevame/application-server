@@ -43,7 +43,7 @@ class Account(Resource):
 		return sha256_crypt.verify(password, hashPass)
 
 	def getToken(self, username):
-		return Serializer(AppKey, 3600).dumps({'username': username})
+		return str(Serializer(AppKey, 3600).dumps({'username': username}))
 
 
 	def put(self, username):
@@ -85,7 +85,7 @@ class Account(Resource):
 				newToken = Account().getToken(user['username'])
 				DataBaseManager().update('users', str(user["_id"]), {'token': newToken})
 
-				dataResponse = {'token': newToken, 'isDriver': 0}
+				dataResponse = {'token': newToken, 'isDriver': False}
 				return llevameResponse.successResponse(dataResponse,200)
 			return llevameResponse.errorResponse('Wrong password', 401)
 
@@ -95,7 +95,7 @@ class Account(Resource):
 				newToken = Account().getToken(user['username'])
 				DataBaseManager().update('users', str(user["_id"]), {'token': newToken})
 
-				dataResponse = {'token': newToken, 'isDriver': 0}
+				dataResponse = {'token': newToken, 'isDriver': False}
 				return llevameResponse.successResponse(dataResponse,200)
 			return llevameResponse.errorResponse('Invalid facebook token', 401)
 
@@ -116,7 +116,7 @@ class Account(Resource):
 				newToken = Account().getToken(user['username'])
 				DataBaseManager().update('drivers', str(user["_id"]), {'token': newToken})
 
-				dataResponse = {'token': newToken, 'isDriver': 1}
+				dataResponse = {'token': newToken, 'isDriver': True}
 				return llevameResponse.successResponse(dataResponse,200)
 			return llevameResponse.errorResponse('Wrong password', 401)
 
@@ -171,8 +171,7 @@ class Account(Resource):
 			userId = DataBaseManager().postTo('users',[body])
 			if len(userId) > 0:
 				logging.info('POST: %s/%s - user created', prefix, username)
-				dataResponse = {'token': token, 'isDriver':0}
-				print(dataResponse)
+				dataResponse = {'token': token, 'isDriver': False}
 				return llevameResponse.successResponse(dataResponse,200)
 			else:
 				logging.error('Sign up user: cant post new user %s', username)
@@ -190,7 +189,7 @@ class Account(Resource):
 		
 		if len(userId) > 0:
 			logging.info('POST: %s/%s - user created', prefix, username)
-			dataResponse = {'token': token, 'isDriver':0}
+			dataResponse = {'token': token, 'isDriver': False}
 			return llevameResponse.successResponse(dataResponse,200)
 
 		logging.error('Sign up user: cant post new user %s', username)
@@ -218,7 +217,7 @@ class Account(Resource):
 			userId = DataBaseManager().postTo('drivers',[body])
 			if len(userId) > 0:
 				logging.info('POST: %s/%s - driver created', prefix, username)
-				dataResponse = {'token': token, 'isDriver':1}
+				dataResponse = {'token': token, 'isDriver': True}
 				return llevameResponse.successResponse(dataResponse,200)
 			else:
 				logging.error('Sign up user: cant post new user %s', username)
