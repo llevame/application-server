@@ -46,7 +46,8 @@ class Account(Resource):
 		return Serializer(AppKey, 3600).dumps({'username': username})
 
 
-
+	def put(self, username):
+		return llevameResponse.successResponse({"test":"test"},200)
 
 	# Login user -> updates token
 	def patch(self, username):
@@ -61,10 +62,10 @@ class Account(Resource):
 			if len(user) == 1:
 				return self.loginDriver(user[0], body)
 
-			return llevameResponse.errorResponse('Error finding User', 400)
+			return llevameResponse.errorResponse('Error finding User', 401)
 
 		except:
-			error = 'GET' + str(sys.exc_info()[0]) + "-" + str(sys.exc_info()[1])
+			error = 'PATCH' + str(sys.exc_info()[0]) + "-" + str(sys.exc_info()[1])
 			logging.error(error)
 			return llevameResponse.errorResponse(error, 400)
 
@@ -84,7 +85,7 @@ class Account(Resource):
 				newToken = Account().getToken(user['username'])
 				DataBaseManager().update('users', str(user["_id"]), {'token': newToken})
 
-				dataResponse = {'token': newToken, 'isDriver': False}
+				dataResponse = {'token': newToken, 'isDriver': 0}
 				return llevameResponse.successResponse(dataResponse,200)
 			return llevameResponse.errorResponse('Wrong password', 401)
 
@@ -94,7 +95,7 @@ class Account(Resource):
 				newToken = Account().getToken(user['username'])
 				DataBaseManager().update('users', str(user["_id"]), {'token': newToken})
 
-				dataResponse = {'token': newToken, 'isDriver': False}
+				dataResponse = {'token': newToken, 'isDriver': 0}
 				return llevameResponse.successResponse(dataResponse,200)
 			return llevameResponse.errorResponse('Invalid facebook token', 401)
 
@@ -115,7 +116,7 @@ class Account(Resource):
 				newToken = Account().getToken(user['username'])
 				DataBaseManager().update('drivers', str(user["_id"]), {'token': newToken})
 
-				dataResponse = {'token': newToken, 'isDriver': True}
+				dataResponse = {'token': newToken, 'isDriver': 1}
 				return llevameResponse.successResponse(dataResponse,200)
 			return llevameResponse.errorResponse('Wrong password', 401)
 
@@ -147,7 +148,7 @@ class Account(Resource):
 		user = DataBaseManager().getFrom('users',{'username':username})
 		if len(user) >= 1:
 			logging.error('POST %s - %s : User already exists')
-			return llevameResponse.errorResponse('User already exists', 400)
+			return llevameResponse.errorResponse('User already exists', 401)
 
 		if 'password' in body and len(body['password']):
 			return self.signUpRegularUser(username, body)
@@ -162,14 +163,16 @@ class Account(Resource):
 		password = body['password']
 		hashPass = self.getHashPassword(password)
 		if self.verifyPass(hashPass, password):
-			body['token'] = Account().getToken(username)
+			token = Account().getToken(username)
+			body['token'] = token
 			body['username'] = username
 			body['password'] = hashPass
 
 			userId = DataBaseManager().postTo('users',[body])
 			if len(userId) > 0:
 				logging.info('POST: %s/%s - user created', prefix, username)
-				dataResponse = {'token': body['token'], 'isDriver':body['isDriver']}
+				dataResponse = {'token': token, 'isDriver':0}
+				print(dataResponse)
 				return llevameResponse.successResponse(dataResponse,200)
 			else:
 				logging.error('Sign up user: cant post new user %s', username)
@@ -180,13 +183,14 @@ class Account(Resource):
 
 
 	def signUpFacebookUser(self, username, body):
-		body['token'] = Account().getToken(username)
+		token = Account().getToken(username)
+		body['token'] = token
 		body['username'] = username
 		userId = DataBaseManager().postTo('users',[body])
 		
 		if len(userId) > 0:
 			logging.info('POST: %s/%s - user created', prefix, username)
-			dataResponse = {'token': body['token'], 'isDriver':body['isDriver']}
+			dataResponse = {'token': token, 'isDriver':0}
 			return llevameResponse.successResponse(dataResponse,200)
 
 		logging.error('Sign up user: cant post new user %s', username)
@@ -197,7 +201,7 @@ class Account(Resource):
 		user = DataBaseManager().getFrom('drivers',{'username':username})
 		if len(user) >= 1:
 			logging.error('POST %s - %s : User already exists')
-			return llevameResponse.errorResponse('User already exists', 400)
+			return llevameResponse.errorResponse('User already exists', 401)
 
 		if (not 'password' in body) or (len(body['password']) == 0):
 			logging.error('Sign up user: invalid password')
@@ -206,14 +210,15 @@ class Account(Resource):
 		password = body['password']
 		hashPass = self.getHashPassword(password)
 		if self.verifyPass(hashPass, password):
-			body['token'] = Account().getToken(username)
+			token = Account().getToken(username)
+			body['token'] = token
 			body['username'] = username
 			body['password'] = hashPass
 
 			userId = DataBaseManager().postTo('drivers',[body])
 			if len(userId) > 0:
 				logging.info('POST: %s/%s - driver created', prefix, username)
-				dataResponse = {'token': body['token'], 'isDriver':body['isDriver']}
+				dataResponse = {'token': token, 'isDriver':1}
 				return llevameResponse.successResponse(dataResponse,200)
 			else:
 				logging.error('Sign up user: cant post new user %s', username)
