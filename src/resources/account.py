@@ -45,10 +45,6 @@ class Account(Resource):
 	def getToken(self, username):
 		return (Serializer(AppKey, 3600).dumps({'username': username})).decode("utf-8") 
 
-
-	def put(self, username):
-		return llevameResponse.successResponse({"test":"test", "otro":True},200)
-
 	# Login user -> updates token
 	def patch(self, username):
 		body = request.json
