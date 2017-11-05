@@ -43,7 +43,7 @@ class Account(Resource):
 		return sha256_crypt.verify(password, hashPass)
 
 	def getToken(self, username):
-		return str(Serializer(AppKey, 3600).dumps({'username': username}))
+		return (Serializer(AppKey, 3600).dumps({'username': username})).decode("utf-8") 
 
 
 	def put(self, username):
