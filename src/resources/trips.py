@@ -18,28 +18,28 @@ auth = Authorization().auth
 class Trips(Resource):
     """
     * Guarda un viaje solicitado de un usuario a un driver especifico
-    * Debe estar la info del usuario (username) y viaje solicitado (array de posiciones)
+    * Debe estar la info driver (username) y viaje solicitado (array de posiciones)
     """	
     @auth.login_required
-    def post(self, driver):
-        logging.info('POST: %s/%s', prefix, driver)
+    def post(self):
+        logging.info('POST: %s', prefix)
         db = DataBaseManager()
         body = request.get_json()
 
         try:
-            if 'username' not in body:
-                return llevameResponse.errorResponse('username is mandatory', 203)
+            user = Authorization().getUserFrom(request)
+            if user is None:
+                return llevameResponse.errorResponse('Invalid user', 403)
+
+            if 'driver' not in body:
+                return llevameResponse.errorResponse('driver is mandatory', 203)
 
             if ('trip' not in body) or (not isinstance(body['trip'], list)) or (len(body['trip']) == 0):
                 return llevameResponse.errorResponse('trip as array is mandatory', 203)
 
-            user = db.getFrom('users',{'username':body['username']})
-            if len(user) != 1:
-                return llevameResponse.errorResponse('There is no passenger', 201)
-
-            drivers = db.getFrom('drivers',{'username':driver})
+            drivers = db.getFrom('drivers',{'username':body['driver']})
             if len(drivers) == 1:
-                body = {'driver':driver, 'passenger': body['username'], 'trip': body['trip'], 'time':time.time()}
+                body = {'driver':body['driver'], 'passenger': user['username'], 'trip': body['trip'], 'time':time.time()}
                 tripIds = db.postTo('trips',[body])
                 responseData = {'tripId': str(tripIds[0])}
                 return llevameResponse.successResponse(responseData,200)
@@ -49,6 +49,29 @@ class Trips(Resource):
             logging.error('POST: %s - %s', sys.exc_info()[0],sys.exc_info()[1])
             return llevameResponse.errorResponse('Error saving trip for driver', 400)
 
+    """
+    * Retorna todos los viajes disponibles del driver que hace la consulta
+    """	
+    @auth.login_required
+    def get(self):
+        logging.info('GET: %s', prefix)
+        db = DataBaseManager()
+
+        try:
+            driver = Authorization().getDriverFrom(request)
+            if driver is None:
+                return llevameResponse.errorResponse('Invalid user', 403)
+
+            trips = db.getFrom('trips',{'driver':driver['username']})
+            for trip in trips:
+                trip['_id'] = str(trip['_id'])
+            return llevameResponse.successResponse(trips,200)            
+
+        except:
+            logging.error('GET: %s - %s', sys.exc_info()[0],sys.exc_info()[1])
+            return llevameResponse.errorResponse('Error getting trip for driver', 400)
+
+
 class TripsEstimate(Resource):
     def post(self):
         logging.info('POST: %s/estimate', prefix)
@@ -56,7 +79,7 @@ class TripsEstimate(Resource):
 
 class TripsIds(Resource):
     def get(self, tripId):
-        logging.info('GET: %s/trip/%s', prefix, tripId)
+        logging.info('GET: %s/%s', prefix, tripId)
         return 'GET request on ' + prefix + '/' + str(tripId)
 
 

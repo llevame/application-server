@@ -58,9 +58,9 @@ api.add_resource(UsersIdsCarsIds, '{}/users/<int:userId>/cars/<int:carId>'.forma
 api.add_resource(UsersIdsTransactions, '{}/users/<int:userId>/transactions'.format(prefix))
 
 # Trips endpoints
-api.add_resource(Trips, '{}/trips/<string:driver>'.format(prefix))
+api.add_resource(Trips, '{}/trips'.format(prefix))
 api.add_resource(TripsEstimate, '{}/trips/estimate'.format(prefix))
-api.add_resource(TripsIds, '{}/trips/trip/<string:tripId>'.format(prefix))
+api.add_resource(TripsIds, '{}/trips/<string:tripId>'.format(prefix))
 
 # Drivers endpoints
 api.add_resource(Drivers, '{}/drivers'.format(prefix))
