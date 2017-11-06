@@ -60,7 +60,7 @@ api.add_resource(UsersIdsTransactions, '{}/users/<int:userId>/transactions'.form
 # Trips endpoints
 api.add_resource(Trips, '{}/trips'.format(prefix))
 api.add_resource(TripsEstimate, '{}/trips/estimate'.format(prefix))
-api.add_resource(TripsIds, '{}/trips/<int:tripId>'.format(prefix))
+api.add_resource(TripsIds, '{}/trips/<string:tripId>'.format(prefix))
 
 # Drivers endpoints
 api.add_resource(Drivers, '{}/drivers'.format(prefix))
