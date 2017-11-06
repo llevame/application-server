@@ -99,6 +99,8 @@ class UsersIdsProfile(Resource):
                 userProfile = db.update('users', str(user["_id"]),body)
                 userProfile.pop("_id", None)
                 userProfile.pop("password", None)
+                userProfile.pop("token", None)
+                userProfile.pop("fb_token", None)
                 logging.info('User profile updated')
                 return llevameResponse.successResponse(userProfile,200)
             else:
