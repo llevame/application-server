@@ -69,7 +69,7 @@ class Trips(Resource):
 
         except:
             logging.error('GET: %s - %s', sys.exc_info()[0],sys.exc_info()[1])
-            return llevameResponse.errorResponse('Error getting trip for driver', 400)
+            return llevameResponse.errorResponse('Error getting trips for driver', 400)
 
 
 class TripsEstimate(Resource):
@@ -78,8 +78,31 @@ class TripsEstimate(Resource):
         return 'POST request on ' + prefix + '/estimate'
 
 class TripsIds(Resource):
+    """
+    * Retorna el viaje solicitado solo si quien lo pide es pasajero o driver del mismo
+    """	
+    @auth.login_required
     def get(self, tripId):
         logging.info('GET: %s/%s', prefix, tripId)
-        return 'GET request on ' + prefix + '/' + str(tripId)
+        try:
+            trips = DataBaseManager().getFrom('trips',{'_id':ObjectId(tripId)})
+            if len(trips) == 1:
+                trip = trips[0]
+                trip['_id'] = str(trip['_id'])
 
+                passenger = Authorization().getUserFrom(request)
+                driver = Authorization().getDriverFrom(request)
+            	if passenger is None and driver is None:
+                    return llevameResponse.errorResponse('Invalid user', 403)
+
+                if passenger is None and trip['driver'] == driver['username']:
+                    return llevameResponse.successResponse(trip,200)            
+
+                if driver is None and trip['passenger'] == passenger['username']:
+                    return llevameResponse.successResponse(trip,200)            
+
+            return llevameResponse.errorResponse("trip not found",400)
+        except:
+            logging.error('GET: %s - %s', sys.exc_info()[0],sys.exc_info()[1])
+            return llevameResponse.errorResponse('Error getting trip', 400)
 
