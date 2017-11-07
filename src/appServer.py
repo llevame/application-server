@@ -27,9 +27,12 @@ from resources.servers import ServersPing
 
 import logging
 import os
+import requests
 
 app = Flask(__name__)
 api = Api(app)
+SHARED_TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MCwicm9sZXMiOlsiYWRtaW4iXSwiaWF0IjoxNTA5OTM2MjA1LCJleHAiOjE1MTAxMDg4NDJ9.kkn0BtV-icJsE1Dj4EGGi3ktkPkQtFVeFqBt-jTufxU"
+API_TOKEN = ""
 
 prefix = "/api/v1"
 
@@ -72,6 +75,18 @@ api.add_resource(Paymethods, '{}/paymethods'.format(prefix))
 
 # Servers endpoints
 api.add_resource(ServersPing, '{}/servers/ping'.format(prefix))
+
+# Getting shared token
+params = {'token' : SHARED_TOKEN}
+r = requests.post(url = 'https://llevame-sharedserver.herokuapp.com/api/servers/1', params = params)
+if r.status_code == 201:
+	data = r.json()
+	print data
+	API_TOKEN = data["server"]["token"]["token"]
+	print API_TOKEN
+else:
+	logging.error('Error authentication with shared')
+	print "Error authentication with shared"
 
 if __name__ == "__main__":
     app.run(debug=True)
