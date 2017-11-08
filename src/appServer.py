@@ -40,6 +40,33 @@ prefix = "/api/v1"
 if not os.path.exists("../logs"):
     os.makedirs("../logs")
 
+# Getting shared token
+applicationParams = {
+	'username' : "dymloz",
+	'password' : "dymloz91"
+}
+print applicationParams
+applicationUserRequest = requests.post(url = 'https://llevame-sharedserver.herokuapp.com/api/token', data = applicationParams)
+if applicationUserRequest.status_code == 201:
+	data = applicationUserRequest.json()
+	SHARED_TOKEN = data["token"]["token"]
+
+	params = {'token' : SHARED_TOKEN}
+	r = requests.post(url = 'https://llevame-sharedserver.herokuapp.com/api/servers/1', params = params)
+	if r.status_code == 201:
+		data = r.json()
+		API_TOKEN = data["server"]["token"]["token"]
+		logging.info('Success getting shared token')
+		print "Success getting shared token"
+	else:
+		logging.error('Error authentication with shared')
+		print "Error authentication with shared"
+else:
+	print applicationUserRequest.json()
+	logging.error('Error getting token for shared')
+	print "Error getting token for shared"
+
+
 log = open("../logs/appServer.log", "w")
 log.close()
 
@@ -75,18 +102,6 @@ api.add_resource(Paymethods, '{}/paymethods'.format(prefix))
 
 # Servers endpoints
 api.add_resource(ServersPing, '{}/servers/ping'.format(prefix))
-
-# Getting shared token
-params = {'token' : SHARED_TOKEN}
-r = requests.post(url = 'https://llevame-sharedserver.herokuapp.com/api/servers/1', params = params)
-if r.status_code == 201:
-	data = r.json()
-	print data
-	API_TOKEN = data["server"]["token"]["token"]
-	print API_TOKEN
-else:
-	logging.error('Error authentication with shared')
-	print "Error authentication with shared"
 
 if __name__ == "__main__":
     app.run(debug=True)
