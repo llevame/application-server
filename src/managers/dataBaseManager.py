@@ -68,3 +68,19 @@ class DataBaseManager(object):
 		except errors.OperationFailure as e:
 			logging.error('UPDATE error: %s', e.details)
 			return {}
+
+	# Update object with 'docId' to collection with 'collectionName' with 'uptadeData'
+	# collectionName: String. Name of the collection.
+	# objects: Dictionary with keys as properties on collection and values as wished
+	def updateWith(self, collectionName, docId, update):
+		try:
+			collection = self.dataBase[collectionName]
+			result = collection.update_one({'_id': ObjectId(docId)}, update, upsert=False)
+			logging.info("Document updated successfully")
+			return result.upserted_id
+		except errors.CollectionInvalid as e:
+			logging.error('UPDATE error: invalid collection')
+			return {}
+		except errors.OperationFailure as e:
+			logging.error('UPDATE error: %s', e.details)
+			return {}
