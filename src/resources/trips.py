@@ -98,17 +98,8 @@ class TripInProgress(Resource):
                 if trip['status'] != CREATED:
                     return llevameResponse.errorResponse('This trip cant be started again', 401)
 
-                passenger = Authorization().getUserFrom(request)
                 driver = Authorization().getDriverFrom(request)
-                if passenger is None and driver is None:
-                    logging.info('PATCH: %s/start - error: invalid user', prefix)
-                    return llevameResponse.errorResponse('Invalid user', 403)
-
-                if passenger is None and (trip['driver'] != driver['username']): 
-                    logging.info('PATCH: %s/start - error: invalid user', prefix)
-                    return llevameResponse.errorResponse('Invalid user', 403)
-
-                if driver is None and (trip['passenger'] != passenger['username']):
+                if driver is None or (trip['driver'] != driver['username']): 
                     logging.info('PATCH: %s/start - error: invalid user', prefix)
                     return llevameResponse.errorResponse('Invalid user', 403)
 
@@ -133,15 +124,9 @@ class TripFinished(Resource):
                 if trip['status'] != IN_PROGRESS:
                     return llevameResponse.errorResponse('This trip cant be finished because it isnt started', 401)
 
-                passenger = Authorization().getUserFrom(request)
                 driver = Authorization().getDriverFrom(request)
-                if passenger is None and driver is None:
-                    return llevameResponse.errorResponse('Invalid user', 403)
-
-                if passenger is None and (trip['driver'] != driver['username']): 
-                    return llevameResponse.errorResponse('Invalid user', 403)
-
-                if driver is None and (trip['passenger'] != passenger['username']):
+                if driver is None or (trip['driver'] != driver['username']): 
+                    logging.info('PATCH: %s/start - error: invalid user', prefix)
                     return llevameResponse.errorResponse('Invalid user', 403)
 
                 tripId = DataBaseManager().update('trips', str(trip["_id"]),{'status':FINISHED})
