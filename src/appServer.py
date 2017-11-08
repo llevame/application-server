@@ -6,6 +6,7 @@ from resources.default import Default
 from resources.account import Account
 
 from resources.users import Users
+from resources.users import UsersMe
 from resources.users import UsersValidate
 from resources.users import UsersIds
 from resources.users import UsersIdsProfile
@@ -52,6 +53,7 @@ api.add_resource(Account, '{}/account/<string:username>'.format(prefix))
 
 # Users endpoints
 api.add_resource(Users, '{}/users'.format(prefix))
+api.add_resource(UsersMe, '{}/users/me'.format(prefix))
 api.add_resource(UsersValidate, '{}/users/validate'.format(prefix))
 api.add_resource(UsersIds, '{}/users/<string:userId>'.format(prefix))
 api.add_resource(UsersIdsProfile, '{}/users/<string:userId>/profile'.format(prefix))

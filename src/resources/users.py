@@ -14,8 +14,14 @@ import sys
 prefix = "/api/v1/users"
 auth = Authorization().auth
 
-class Users(Resource):
 
+def makeUserSecure(user):
+    user.pop("_id", None)
+    user.pop("password", None)
+    user.pop("token", None)
+    user.pop("fb_token", None)
+
+class Users(Resource):
     @auth.login_required
     def get(self):
         logging.info('GET: %s', prefix)
@@ -23,14 +29,29 @@ class Users(Resource):
         try:
             users = db.getFrom('users',{})
             for user in users:
-                user.pop("_id", None)
-                user.pop("password", None)
-                user.pop("token", None)
+                makeUserSecure(user)
             return llevameResponse.successResponse(users,200)
         except:
             logging.error('GET: %s - %s', sys.exc_info()[0],sys.exc_info()[1])
             return llevameResponse.errorResponse('Error getting Users', 400)
-    
+
+class UsersMe(Resource):
+    @auth.login_required
+    def get(self):
+        logging.info('GET: %s/me', prefix)
+        db = DataBaseManager()
+        try:
+            user = Authorization().getUserFrom(request)
+            if user is None:
+                user = Authorization().getDriverFrom(request)
+
+            if user is None:
+                return llevameResponse.errorResponse('Invalid user', 403)
+
+            return llevameResponse.successResponse(makeUserSecure(user),200)
+        except:
+            logging.error('GET: %s - %s', sys.exc_info()[0],sys.exc_info()[1])
+            return llevameResponse.errorResponse('Error getting Users', 400)
 
 class UsersValidate(Resource):
     def post(self):
