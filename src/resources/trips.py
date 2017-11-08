@@ -92,7 +92,7 @@ class TripsIds(Resource):
 
                 passenger = Authorization().getUserFrom(request)
                 driver = Authorization().getDriverFrom(request)
-            	if passenger is None and driver is None:
+                if passenger is None and driver is None:
                     return llevameResponse.errorResponse('Invalid user', 403)
 
                 if passenger is None and trip['driver'] == driver['username']:
