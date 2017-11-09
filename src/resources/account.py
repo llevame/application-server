@@ -20,6 +20,50 @@ auth = Authorization().auth
 
 AppKey = "asdasdadsasdasd"
 
+class AccountMe(Resource):
+    @auth.login_required
+    def get(self):
+        logging.info('GET: %s/me', prefix)
+        db = DataBaseManager()
+        try:
+            user = Authorization().getUserFrom(request)
+            if user is None:
+                user = Authorization().getDriverFrom(request)
+
+            if user is None:
+                return llevameResponse.errorResponse('Invalid user', 403)
+
+            user.pop('_id')
+            return llevameResponse.successResponse(user,200)
+        except:
+            logging.error('GET: %s - %s', sys.exc_info()[0],sys.exc_info()[1])
+            return llevameResponse.errorResponse('Error getting Users', 400)
+
+    @auth.login_required
+    def patch(self):
+        logging.info('PATCH: %s/me', prefix)
+        db = DataBaseManager()
+        body = request.get_json()
+        try:
+            user = Authorization().getUserFrom(request)
+            if user is None:
+                user = Authorization().getDriverFrom(request)
+
+            if user is None:
+                return llevameResponse.errorResponse('Invalid user', 403)
+
+            if len(user) == 1:
+                user = user[0]
+                userProfile = db.update('users', str(user["_id"]),body)
+                logging.info('User profile updated' + str(body))
+                return llevameResponse.successResponse({},200)
+            else:
+                return llevameResponse.errorResponse('Error finding User', 400)
+        except:
+            logging.error('PATCH: %s - %s', sys.exc_info()[0],sys.exc_info()[1])
+            return llevameResponse.errorResponse('Error updating user profile', 400)
+
+
 class Account(Resource):
     
 	def getHashPassword(self, password):
