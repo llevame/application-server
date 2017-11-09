@@ -45,20 +45,18 @@ class AccountMe(Resource):
         db = DataBaseManager()
         body = request.get_json()
         try:
+            collection = 'users'
             user = Authorization().getUserFrom(request)
             if user is None:
+                collection = 'drivers'
                 user = Authorization().getDriverFrom(request)
 
             if user is None:
                 return llevameResponse.errorResponse('Invalid user', 403)
 
-            if len(user) == 1:
-                user = user[0]
-                userProfile = db.update('users', str(user["_id"]),body)
-                logging.info('User profile updated' + str(body))
-                return llevameResponse.successResponse({},200)
-            else:
-                return llevameResponse.errorResponse('Error finding User', 400)
+            userProfile = db.update(collection, str(user["_id"]),body)
+            logging.info('User profile updated' + str(body))
+            return llevameResponse.successResponse({},200)
         except:
             logging.error('PATCH: %s - %s', sys.exc_info()[0],sys.exc_info()[1])
             return llevameResponse.errorResponse('Error updating user profile', 400)
