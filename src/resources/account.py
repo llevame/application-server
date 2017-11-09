@@ -1,12 +1,12 @@
 from flask_restful import Resource
 from flask import jsonify
 from flask import request
-
+from managers.apiConfig import ApiConfig
 from bson.json_util import loads
 from bson.objectid import ObjectId
 from . import llevameResponse
 from managers.dataBaseManager import DataBaseManager
-
+from managers import sharedServices
 from passlib.hash import sha256_crypt
 from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
 
@@ -17,6 +17,7 @@ import sys
 
 prefix = "/api/v1/account"
 auth = Authorization().auth
+apiConfig = ApiConfig()
 
 AppKey = "asdasdadsasdasd"
 
@@ -81,6 +82,8 @@ class Account(Resource):
 		logging.info('POST: %s/%s', prefix, username)
 		db = DataBaseManager()
 		body = request.get_json()
+		sharedResponse = sharedServices.postToShared(apiConfig.SHARED_URL + '/api/users', body, {})
+		print sharedResponse
 		try:
 			user = db.getFrom('users',{'username':username})
 			if len(user) >= 1:
