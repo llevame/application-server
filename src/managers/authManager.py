@@ -15,12 +15,12 @@ class Authorization:
 		db = DataBaseManager()
 		user = db.getFrom('users',{'token':token})
 		if len(user) == 1:
-			logging.info('User found')
+			logging.info('User found ' + token)
 			return True
 
 		user = db.getFrom('drivers',{'token':token})
 		if len(user) == 1:
-			logging.info('User found')
+			logging.info('Driver found ' + token)
 			return True
 
 		logging.info('User not found')
@@ -33,7 +33,6 @@ class Authorization:
 
 		user = DataBaseManager().getFrom('users',{'token':token})
 		if len(user) == 1:
-			logging.info('User found')
 			return user[0]
 		return None
 
@@ -44,6 +43,5 @@ class Authorization:
 
 		user = DataBaseManager().getFrom('drivers',{'token':token})
 		if len(user) == 1:
-			logging.info('User found')
 			return user[0]
 		return None
