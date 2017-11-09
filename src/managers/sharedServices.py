@@ -1,25 +1,12 @@
 from managers.apiConfig import ApiConfig
 import requests
+import json
 
 def postToShared(url,body,data):
 	apiConfig = ApiConfig()
-	body =  {
-				'type': "passenger",
-				'username': "user123",
-				'password': "45678",
-				'fb': {
-					'userId': "2",
-					'authToken': "ffegg5443r"
-				},
-				'firstName': "user",
-				'lastName': "userlastname",
-				'country': "Argentina",
-				'email': "user@gmail.com",
-				'birthdate': "23/2/1999",
-				'images': ["i1", "i2"]
-			}
+	print json.dumps(body)
 	data["token"] = apiConfig.API_TOKEN
-	r = requests.post(url = url, data = body)
+	r = requests.post(url = url, data = json.dumps(body), params = data)
 	if r.status_code == 401:
 		params = {'token' : apiConfig.SHARED_TOKEN}
 		r2 = requests.post(url = apiConfig.SHARED_URL + '/api/servers/1', params = params)
