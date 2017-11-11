@@ -21,20 +21,6 @@ def makeUserSecure(user):
     user.pop("token", None)
     user.pop("fb_token", None)
 
-class Users(Resource):
-    @auth.login_required
-    def get(self):
-        logging.info('GET: %s', prefix)
-        db = DataBaseManager()
-        try:
-            users = db.getFrom('users',{})
-            for user in users:
-                makeUserSecure(user)
-            return llevameResponse.successResponse(users,200)
-        except:
-            logging.error('GET: %s - %s', sys.exc_info()[0],sys.exc_info()[1])
-            return llevameResponse.errorResponse('Error getting Users', 400)
-
 class UsersValidate(Resource):
     def post(self):
         logging.info('POST: %s/validate', prefix)

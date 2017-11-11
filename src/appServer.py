@@ -6,7 +6,6 @@ from resources.default import Default
 from resources.account import Account
 from resources.account import AccountMe
 
-from resources.users import Users
 from resources.users import UsersValidate
 from resources.users import UsersProfile
 from resources.users import UsersIdsCars
@@ -51,7 +50,6 @@ api.add_resource(Account, '{}/account/<string:username>'.format(prefix))
 api.add_resource(AccountMe, '{}/account/me'.format(prefix))
 
 # Users endpoints
-api.add_resource(Users, '{}/users'.format(prefix))
 api.add_resource(UsersValidate, '{}/users/validate'.format(prefix))
 api.add_resource(UsersProfile, '{}/users/<string:userId>/profile'.format(prefix))
 api.add_resource(UsersIdsCars, '{}/users/<int:userId>/cars'.format(prefix))
