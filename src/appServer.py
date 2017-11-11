@@ -4,18 +4,16 @@ from flask_restful import Resource, Api
 from resources.default import Default
 
 from resources.account import Account
+from resources.account import AccountMe
 
-from resources.users import Users
 from resources.users import UsersValidate
-from resources.users import UsersIds
-from resources.users import UsersIdsProfile
+from resources.users import UsersProfile
 from resources.users import UsersIdsCars
 from resources.users import UsersIdsCarsIds
 from resources.users import UsersIdsTransactions
 
 from resources.drivers import Drivers
-from resources.drivers import DriversIds
-from resources.drivers import DriversIdsProfile
+from resources.drivers import DriversProfile
 
 from resources.trips import Trips
 from resources.trips import TripsEstimate
@@ -49,12 +47,11 @@ api.add_resource(Default, prefix)
 
 # Account endpoints
 api.add_resource(Account, '{}/account/<string:username>'.format(prefix))
+api.add_resource(AccountMe, '{}/account/me'.format(prefix))
 
 # Users endpoints
-api.add_resource(Users, '{}/users'.format(prefix))
 api.add_resource(UsersValidate, '{}/users/validate'.format(prefix))
-api.add_resource(UsersIds, '{}/users/<string:userId>'.format(prefix))
-api.add_resource(UsersIdsProfile, '{}/users/<string:userId>/profile'.format(prefix))
+api.add_resource(UsersProfile, '{}/users/<string:userId>/profile'.format(prefix))
 api.add_resource(UsersIdsCars, '{}/users/<int:userId>/cars'.format(prefix))
 api.add_resource(UsersIdsCarsIds, '{}/users/<int:userId>/cars/<int:carId>'.format(prefix))
 api.add_resource(UsersIdsTransactions, '{}/users/<int:userId>/transactions'.format(prefix))
@@ -68,8 +65,7 @@ api.add_resource(TripsIds, '{}/trips/<string:tripId>'.format(prefix))
 
 # Drivers endpoints
 api.add_resource(Drivers, '{}/drivers'.format(prefix))
-api.add_resource(DriversIds, '{}/drivers/<string:driverId>'.format(prefix))
-api.add_resource(DriversIdsProfile, '{}/drivers/<string:driverId>/profile'.format(prefix))
+api.add_resource(DriversProfile, '{}/drivers/<string:driverId>/profile'.format(prefix))
 
 # Paymethods endpoints
 api.add_resource(Paymethods, '{}/paymethods'.format(prefix))
