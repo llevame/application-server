@@ -5,19 +5,20 @@ from bson.objectid import ObjectId
 from . import llevameResponse
 from managers.dataBaseManager import DataBaseManager
 from managers.authManager import Authorization
+from managers.pushNotificationManager import PushNotificationManager
 
-#from enum import Enum
+from enum import Enum
 
 import time
 
 import logging
 import sys
 
-#class TripStatus(Enum):
-CREATED = 0
-IN_PROGRESS = 1
-FINISHED = 2
-CANCELED = 3
+class TripStatus(Enum):
+    CREATED = 0
+    IN_PROGRESS = 1
+    FINISHED = 2
+    CANCELED = 3
 
 prefix = "/api/v1/trips"
 auth = Authorization().auth
@@ -47,10 +48,13 @@ class Trips(Resource):
             drivers = db.getFrom('drivers',{'username':body['driver']})
             if len(drivers) == 1:
                 body = {'driver':body['driver'], 'passenger': user['username'], 'trip': body['trip'], 'time':time.time()}
-                body['status'] = CREATED
+                body['status'] = TripStatus.CREATED
 
                 tripIds = db.postTo('trips',[body])
-                responseData = {'tripId': str(tripIds[0])}
+                tripId = str(tripIds[0])
+                PushNotificationManager().sendNewTripPush(body['driver'], tripId)
+
+                responseData = {'tripId': tripId}
                 return llevameResponse.successResponse(responseData,200)
             
             return llevameResponse.errorResponse('There is no driver', 201)
@@ -95,7 +99,7 @@ class TripInProgress(Resource):
             if len(trips) == 1:
                 trip = trips[0]
 
-                if trip['status'] != CREATED:
+                if trip['status'] != TripStatus.CREATED:
                     return llevameResponse.errorResponse('This trip cant be started again', 401)
 
                 driver = Authorization().getDriverFrom(request)
@@ -103,7 +107,7 @@ class TripInProgress(Resource):
                     logging.info('PATCH: %s/start - error: invalid user', prefix)
                     return llevameResponse.errorResponse('Invalid user', 403)
 
-                tripId = DataBaseManager().update('trips', str(trip["_id"]),{'status':IN_PROGRESS})
+                tripId = DataBaseManager().update('trips', str(trip["_id"]),{'status':TripStatus.IN_PROGRESS})
                 return llevameResponse.successResponse({'tripId':tripId},200)
 
             return llevameResponse.errorResponse("trip not found",400)
@@ -121,7 +125,7 @@ class TripFinished(Resource):
             if len(trips) == 1:
                 trip = trips[0]
 
-                if trip['status'] != IN_PROGRESS:
+                if trip['status'] != TripStatus.IN_PROGRESS:
                     return llevameResponse.errorResponse('This trip cant be finished because it isnt started', 401)
 
                 driver = Authorization().getDriverFrom(request)
@@ -129,9 +133,10 @@ class TripFinished(Resource):
                     logging.info('PATCH: %s/start - error: invalid user', prefix)
                     return llevameResponse.errorResponse('Invalid user', 403)
 
-                tripId = DataBaseManager().update('trips', str(trip["_id"]),{'status':FINISHED})
-                return llevameResponse.successResponse({'tripId':tripId},200)
+                tripId = DataBaseManager().update('trips', str(trip["_id"]),{'status': TripStatus.FINISHED})
+                PushNotificationManager().sendTripFinishedPush(trip["passenger"], tripId)
 
+                return llevameResponse.successResponse({'tripId':tripId},200)
 
             return llevameResponse.errorResponse("trip not found",400)
         except:
@@ -159,7 +164,7 @@ class TripsIds(Resource):
             if len(trips) == 1:
                 trip = trips[0]
 
-                if trip['status'] != IN_PROGRESS:
+                if trip['status'] != TripStatus.IN_PROGRESS:
                     return llevameResponse.errorResponse('This trip cant be edited because it isnt started', 401)
 
                 passenger = Authorization().getUserFrom(request)
