@@ -4,12 +4,11 @@ import json
 
 def postToShared(url,body,data):
 	apiConfig = ApiConfig()
-	print url
+
 	print body
 
 	data["token"] = apiConfig.API_TOKEN
-	print data
-	r = requests.post(url = url, data = body, params = data)
+	r = requests.post(url = url, data = body, params = json.dumps(data))
 	if r.status_code == 401:
 		params = {'token' : apiConfig.SHARED_TOKEN}
 		r2 = requests.post(url = apiConfig.SHARED_URL + '/api/servers/1', params = params)
