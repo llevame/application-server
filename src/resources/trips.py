@@ -119,6 +119,7 @@ class TripStatus(Resource):
 
                 if newStatus == TripStatusEnum.ASSIGNATED and actualStatus == TripStatusEnum.CREATED:
                     DataBaseManager().update('trips', str(trip["_id"]),{'status':newStatus})
+                    PushNotificationManager().sendTripAcceptedPush(trip["passenger"], tripId)
                     logging.info('PATCH: %s/status - trip assignated', prefix)
                     return llevameResponse.successResponse({'tripId':tripId},200)
 

@@ -10,6 +10,10 @@ class PushNotificationManager:
 		data_message = {"trip": tripId}
 		self.sendDriverPush(username, title="New trip", body="New trip available", dataMessage=dataMessage)
 
+	def sendTripAcceptedPush(self, username, tripId):
+		data_message = {"trip": tripId}
+		self.sendUserPush(username, title="Trip accepted", body="Your driver will contact you", dataMessage=dataMessage)
+
 	def sendTripFinishedPush(self, username, tripId):
 		data_message = {"trip": tripId}
 		self.sendUserPush(username, title="Trip finished", dataMessage=dataMessage)
