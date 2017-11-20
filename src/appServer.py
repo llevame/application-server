@@ -17,8 +17,7 @@ from resources.drivers import DriversProfile
 
 from resources.trips import Trips
 from resources.trips import TripsEstimate
-from resources.trips import TripInProgress
-from resources.trips import TripFinished
+from resources.trips import TripStatus
 from resources.trips import TripsIds
 
 from resources.paymethods import Paymethods
@@ -59,8 +58,7 @@ api.add_resource(UsersIdsTransactions, '{}/users/<int:userId>/transactions'.form
 # Trips endpoints
 api.add_resource(Trips, '{}/trips'.format(prefix))
 api.add_resource(TripsEstimate, '{}/trips/estimate'.format(prefix))
-api.add_resource(TripInProgress, '{}/trips/<string:tripId>/start'.format(prefix))
-api.add_resource(TripFinished, '{}/trips/<string:tripId>/end'.format(prefix))
+api.add_resource(TripStatus, '{}/trips/<string:tripId>/status'.format(prefix))
 api.add_resource(TripsIds, '{}/trips/<string:tripId>'.format(prefix))
 
 # Drivers endpoints
