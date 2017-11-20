@@ -6,6 +6,7 @@ from . import llevameResponse
 from managers.dataBaseManager import DataBaseManager
 from managers.authManager import Authorization
 from managers.pushNotificationManager import PushNotificationManager
+from managers.googleApiManager import GoogleApiManager
 
 from enum import IntEnum
 from threading import Timer
@@ -100,10 +101,42 @@ class Trips(Resource):
             return llevameResponse.errorResponse('Error getting trips for driver', 400)
 
 
-class TripsEstimate(Resource):
+class TripTentative(Resource):
     def post(self):
-        logging.info('POST: %s/estimate', prefix)
-        return 'POST request on ' + prefix + '/estimate'
+        #TODO: integrate with shared to get estimated cost
+        logging.info('POST: %s/tentative', prefix)
+        try:
+            body = request.get_json()
+            if 'start' not in body or 'end' not in body:
+                return llevameResponse.errorResponse('start and end point are mandatory', 403)
+
+            if 'latitude' not in body['start'] or 'longitude' not in body['start']:
+                return llevameResponse.errorResponse('start as {latitude: X, longitude: X} is mandatory', 403)
+            if 'latitude' not in body['end'] or 'longitude' not in body['end']:
+                return llevameResponse.errorResponse('end as {latitude: X, longitude: X} is mandatory', 403)
+
+            startAddress = GoogleApiManager().getAddressForLocation(body['start'])
+            if startAddress is None:
+                logging.error('POST tentative trip - Invalid start')
+                return llevameResponse.errorResponse('Invalid start point', 403)
+
+            endAddress = GoogleApiManager().getAddressForLocation(body['end'])
+            if endAddress is None:
+                logging.error('POST tentative trip - Invalid end')
+                return llevameResponse.errorResponse('Invalid end point', 403)
+
+            directions = GoogleApiManager().getDirectionsForAddress(startAddress, endAddress)
+
+            if directions is None:
+                logging.info('POST tentative trip - direction not found')
+                directions = []
+                
+            responseData = {'directions':directions, 'cost':0}
+            return llevameResponse.successResponse(responseData, 200)
+            
+        except:
+            logging.error('POST: %s - %s', sys.exc_info()[0],sys.exc_info()[1])
+            return llevameResponse.errorResponse('Error creating tentative trip', 400)
 
 
 class TripStatus(Resource):
