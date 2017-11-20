@@ -14,6 +14,10 @@ class PushNotificationManager:
 		dataMessage = {"trip": tripId}
 		self.sendUserPush(username, title="Trip accepted", body="Your driver will contact you", dataMessage=dataMessage)
 
+	def sendTripCanceledPush(self, username, tripId):
+		dataMessage = {"trip": tripId}
+		self.sendUserPush(username, title="Trip rejected", body="Your driver has rejected your trip, choose another one", dataMessage=dataMessage)
+
 	def sendTripFinishedPush(self, username, tripId):
 		dataMessage = {"trip": tripId}
 		self.sendUserPush(username, title="Trip finished", dataMessage=dataMessage)

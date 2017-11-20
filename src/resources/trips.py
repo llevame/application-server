@@ -8,6 +8,7 @@ from managers.authManager import Authorization
 from managers.pushNotificationManager import PushNotificationManager
 
 from enum import IntEnum
+from threading import Timer
 
 import time
 
@@ -23,6 +24,16 @@ class TripStatusEnum(IntEnum):
 
 prefix = "/api/v1/trips"
 auth = Authorization().auth
+
+def cancelTrip(passenger, tripId):
+    trips = DataBaseManager().getFrom('trips',{'_id':ObjectId(tripId)})
+    # If trip wasnt assignated yet, cancel it
+    if len(trips) == 1 and (trips[0])['status'] == TripStatusEnum.CREATED:
+        logging.info('Trip %s canceled after time out', tripId)
+        DataBaseManager().update('trips', tripId,{'status': TripStatusEnum.CANCELED})
+        PushNotificationManager().sendTripCanceledPush(passenger, tripId)
+
+
 
 class Trips(Resource):
     """
@@ -54,6 +65,9 @@ class Trips(Resource):
                 tripIds = db.postTo('trips',[body])
                 tripId = str(tripIds[0])
                 PushNotificationManager().sendNewTripPush(body['driver'], tripId)
+
+                timer = Timer(1 * 60, cancelTrip, [user['username'], tripId])
+                timer.start()
 
                 responseData = {'tripId': tripId}
                 return llevameResponse.successResponse(responseData,200)
@@ -137,6 +151,7 @@ class TripStatus(Resource):
                 if newStatus == TripStatusEnum.CANCELED:
                     # TODO: Define what to do if trip was in progress and was caneled
                     DataBaseManager().update('trips', str(trip["_id"]),{'status':newStatus})
+                    PushNotificationManager().sendTripCanceledPush(trip["passenger"], tripId)
                     logging.info('PATCH: %s/status - trip canceled', prefix)
                     return llevameResponse.successResponse({'tripId':tripId},200)
 
