@@ -20,7 +20,7 @@ class PushNotificationManager:
 
 
 
-	def sendUserPush(self, username, dataMessage = None):
+	def sendUserPush(self, username, title = "title", body = "", dataMessage = None):
 		users = DataBaseManager().getFrom('users',{'username':username})
 		if len(users) == 1:
 			user = users[0]
@@ -29,13 +29,13 @@ class PushNotificationManager:
 				return None
 
 			deviceId = user['deviceId']
-			return self.sendPush(deviceId, dataMessage=dataMessage)
+			return self.sendPush(deviceId, title=title, body=body, dataMessage=dataMessage)
 
 		logging.error("Push Notifications - user not found")
 		return None
 
 
-	def sendDriverPush(self, username, dataMessage = None):
+	def sendDriverPush(self, username, title = "title", body = "", dataMessage = None):
 		users = DataBaseManager().getFrom('drivers',{'username':username})
 		if len(users) == 1:
 			user = users[0]
@@ -43,13 +43,13 @@ class PushNotificationManager:
 				logging.error("Push Notifications - driver " + userId + " do not have device Id for push notifications")
 				return None
 
-			deviceId = user['deviceId']
-			return self.sendPush(deviceId, dataMessage=dataMessage)
+			deviceId = user['firebaseToken']
+			return self.sendPush(deviceId, title=title, body=body, dataMessage=dataMessage)
 		logging.error("Push Notifications - driver not found")
 		return None
 
 
-	def sendPush(self, deviceID, title = "title", body = "message", dataMessage = None):
+	def sendPush(self, deviceID, title = "Llevame App", body = "", dataMessage = None):
 		push_service = FCMNotification(api_key=apiKey)
 
 		result = push_service.notify_single_device(registration_id=deviceID, message_title=title, message_body=body, data_message=dataMessage)
