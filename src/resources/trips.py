@@ -7,18 +7,19 @@ from managers.dataBaseManager import DataBaseManager
 from managers.authManager import Authorization
 from managers.pushNotificationManager import PushNotificationManager
 
-from enum import Enum
+from enum import IntEnum
 
 import time
 
 import logging
 import sys
 
-class TripStatus(Enum):
+class TripStatusEnum(IntEnum):
     CREATED = 0
-    IN_PROGRESS = 1
-    FINISHED = 2
-    CANCELED = 3
+    ASSIGNATED = 1
+    IN_PROGRESS = 2
+    FINISHED = 3
+    CANCELED = 4
 
 prefix = "/api/v1/trips"
 auth = Authorization().auth
@@ -48,7 +49,7 @@ class Trips(Resource):
             drivers = db.getFrom('drivers',{'username':body['driver']})
             if len(drivers) == 1:
                 body = {'driver':body['driver'], 'passenger': user['username'], 'trip': body['trip'], 'time':time.time()}
-                body['status'] = TripStatus.CREATED
+                body['status'] = TripStatusEnum.CREATED
 
                 tripIds = db.postTo('trips',[body])
                 tripId = str(tripIds[0])
@@ -90,58 +91,62 @@ class TripsEstimate(Resource):
         logging.info('POST: %s/estimate', prefix)
         return 'POST request on ' + prefix + '/estimate'
 
-class TripInProgress(Resource):
+
+class TripStatus(Resource):
     @auth.login_required
     def patch(self, tripId):
-        logging.info('PATCH: %s/start', prefix)
+        logging.info('PATCH: %s/status', prefix)
         try:
+            body = request.get_json()
+            if 'status' not in body:
+                return llevameResponse.errorResponse('status is mandatory', 401)
+
+            newStatus = body['status']
             trips = DataBaseManager().getFrom('trips',{'_id':ObjectId(tripId)})
             if len(trips) == 1:
                 trip = trips[0]
 
-                if trip['status'] != TripStatus.CREATED:
-                    return llevameResponse.errorResponse('This trip cant be started again', 401)
-
                 driver = Authorization().getDriverFrom(request)
                 if driver is None or (trip['driver'] != driver['username']): 
-                    logging.info('PATCH: %s/start - error: invalid user', prefix)
+                    logging.info('PATCH: %s/status - error: invalid user', prefix)
                     return llevameResponse.errorResponse('Invalid user', 403)
 
-                tripId = DataBaseManager().update('trips', str(trip["_id"]),{'status':TripStatus.IN_PROGRESS})
-                return llevameResponse.successResponse({'tripId':tripId},200)
+                actualStatus = trip['status']
+
+                if actualStatus >= newStatus:
+                    logging.info('PATCH: %s/status - actual status(%d) greater than new one(%d)', prefix, actualStatus, newStatus)
+                    return llevameResponse.errorResponse('Invalid new status', 401)
+
+                if newStatus == TripStatusEnum.ASSIGNATED and actualStatus == TripStatusEnum.CREATED:
+                    DataBaseManager().update('trips', str(trip["_id"]),{'status':newStatus})
+                    logging.info('PATCH: %s/status - trip assignated', prefix)
+                    return llevameResponse.successResponse({'tripId':tripId},200)
+
+                if newStatus == TripStatusEnum.IN_PROGRESS and actualStatus == TripStatusEnum.ASSIGNATED:
+                    DataBaseManager().update('trips', str(trip["_id"]),{'status':newStatus})
+                    logging.info('PATCH: %s/status - trip started', prefix)
+                    return llevameResponse.successResponse({'tripId':tripId},200)
+
+                if newStatus == TripStatusEnum.FINISHED and actualStatus == TripStatusEnum.IN_PROGRESS:
+                    DataBaseManager().update('trips', str(trip["_id"]),{'status':newStatus})
+                    PushNotificationManager().sendTripFinishedPush(trip["passenger"], tripId)
+                    logging.info('PATCH: %s/status - trip finished', prefix)
+                    return llevameResponse.successResponse({'tripId':tripId},200)
+
+                if newStatus == TripStatusEnum.CANCELED:
+                    # TODO: Define what to do if trip was in progress and was caneled
+                    DataBaseManager().update('trips', str(trip["_id"]),{'status':newStatus})
+                    logging.info('PATCH: %s/status - trip canceled', prefix)
+                    return llevameResponse.successResponse({'tripId':tripId},200)
+
+                logging.info('PATCH: %s/status - invalid new status %d (actual status: %d)', prefix, newStatus, actualStatus)
+                return llevameResponse.errorResponse("invalid new status",401)
 
             return llevameResponse.errorResponse("trip not found",400)
         except:
             logging.error('PATCH: %s - %s', sys.exc_info()[0],sys.exc_info()[1])
             return llevameResponse.errorResponse('Error starting trip', 400)
 
-
-class TripFinished(Resource):
-    @auth.login_required
-    def patch(self, tripId):
-        logging.info('PATCH: %s/end', prefix)
-        try:
-            trips = DataBaseManager().getFrom('trips',{'_id':ObjectId(tripId)})
-            if len(trips) == 1:
-                trip = trips[0]
-
-                if trip['status'] != TripStatus.IN_PROGRESS:
-                    return llevameResponse.errorResponse('This trip cant be finished because it isnt started', 401)
-
-                driver = Authorization().getDriverFrom(request)
-                if driver is None or (trip['driver'] != driver['username']): 
-                    logging.info('PATCH: %s/start - error: invalid user', prefix)
-                    return llevameResponse.errorResponse('Invalid user', 403)
-
-                tripId = DataBaseManager().update('trips', str(trip["_id"]),{'status': TripStatus.FINISHED})
-                PushNotificationManager().sendTripFinishedPush(trip["passenger"], tripId)
-
-                return llevameResponse.successResponse({'tripId':tripId},200)
-
-            return llevameResponse.errorResponse("trip not found",400)
-        except:
-            logging.error('PATCH: %s - %s', sys.exc_info()[0],sys.exc_info()[1])
-            return llevameResponse.errorResponse('Error ending trip', 400)
 
 class TripsIds(Resource):
     """
@@ -152,19 +157,19 @@ class TripsIds(Resource):
         logging.info('PATCH: %s/%s', prefix, tripId)
         try:
             body = request.get_json()
-            if 'position' not in body:
-                return llevameResponse.errorResponse('position is mandatory', 401)
+            if 'location' not in body:
+                return llevameResponse.errorResponse('location is mandatory', 401)
 
-            if 'lat' not in body['position'] or 'lon' not in body['position']:
-                return llevameResponse.errorResponse('position as {lat: X, lon: X} is mandatory', 401)
+            if 'latitude' not in body['location'] or 'longitude' not in body['location']:
+                return llevameResponse.errorResponse('location as {latitude: X, longitude: X} is mandatory', 401)
 
-            position = body['position']
+            position = body['location']
 
             trips = DataBaseManager().getFrom('trips',{'_id':ObjectId(tripId)})
             if len(trips) == 1:
                 trip = trips[0]
 
-                if trip['status'] != TripStatus.IN_PROGRESS:
+                if trip['status'] != TripStatusEnum.IN_PROGRESS:
                     return llevameResponse.errorResponse('This trip cant be edited because it isnt started', 401)
 
                 passenger = Authorization().getUserFrom(request)
