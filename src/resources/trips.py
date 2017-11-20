@@ -50,7 +50,7 @@ class Trips(Resource):
         try:
             user = Authorization().getUserFrom(request)
             if user is None:
-                return llevameResponse.errorResponse('Invalid user', 403)
+                return llevameResponse.errorResponse('Invalid user', 401)
 
             if 'driver' not in body:
                 return llevameResponse.errorResponse('driver is mandatory', 203)
@@ -89,7 +89,7 @@ class Trips(Resource):
         try:
             driver = Authorization().getDriverFrom(request)
             if driver is None:
-                return llevameResponse.errorResponse('Invalid user', 403)
+                return llevameResponse.errorResponse('Invalid user', 401)
 
             trips = db.getFrom('trips',{'driver':driver['username']})
             for trip in trips:
@@ -106,6 +106,10 @@ class TripTentative(Resource):
         #TODO: integrate with shared to get estimated cost
         logging.info('POST: %s/tentative', prefix)
         try:
+            user = Authorization().getUserFrom(request)
+            if user is None:
+                return llevameResponse.errorResponse('Invalid user', 401)
+
             body = request.get_json()
             if 'start' not in body or 'end' not in body:
                 return llevameResponse.errorResponse('start and end point are mandatory', 403)
@@ -152,7 +156,7 @@ class TripStatus(Resource):
                 driver = Authorization().getDriverFrom(request)
                 if driver is None or (trip['driver'] != driver['username']): 
                     logging.info('PATCH: %s/status - error: invalid user', prefix)
-                    return llevameResponse.errorResponse('Invalid user', 403)
+                    return llevameResponse.errorResponse('Invalid user', 401)
 
                 actualStatus = trip['status']
 
@@ -220,7 +224,7 @@ class TripsIds(Resource):
                 passenger = Authorization().getUserFrom(request)
                 driver = Authorization().getDriverFrom(request)
                 if passenger is None and driver is None:
-                    return llevameResponse.errorResponse('Invalid user', 403)
+                    return llevameResponse.errorResponse('Invalid user', 401)
 
                 if passenger is None and trip['driver'] == driver['username']:
                     return self.updateTripPostion(trip, driver, position)
@@ -228,7 +232,7 @@ class TripsIds(Resource):
                 if driver is None and trip['passenger'] == passenger['username']:
                     return self.updateTripPostion(trip, passenger, position)
 
-                return llevameResponse.errorResponse('Invalid user', 403)
+                return llevameResponse.errorResponse('Invalid user', 401)
 
             return llevameResponse.errorResponse("trip not found",400)
         except:
@@ -260,7 +264,7 @@ class TripsIds(Resource):
                 passenger = Authorization().getUserFrom(request)
                 driver = Authorization().getDriverFrom(request)
                 if passenger is None and driver is None:
-                    return llevameResponse.errorResponse('Invalid user', 403)
+                    return llevameResponse.errorResponse('Invalid user', 401)
 
                 if passenger is None and trip['driver'] == driver['username']:
                     return llevameResponse.successResponse(trip,200)            
