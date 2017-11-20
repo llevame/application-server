@@ -54,7 +54,7 @@ class PushNotificationManager:
 
 
 	def sendPush(self, deviceID, title = "Llevame App", body = "", dataMessage = None):
-		push_service = FCMNotification(api_key=apiKey)
+		push_service = FCMNotification(api_key= self.apiKey)
 
 		result = push_service.notify_single_device(registration_id=deviceID, message_title=title, message_body=body, data_message=dataMessage)
 		print(result)
@@ -66,7 +66,7 @@ class PushNotificationManager:
 			logging.error("Push Notifications - device ids is not a list")
 			return None
 
-		push_service = FCMNotification(api_key=apiKey)
+		push_service = FCMNotification(api_key= self.apiKey)
 
 		registration_ids = deviceIDs
 		message_title = "message title"
