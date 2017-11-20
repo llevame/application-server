@@ -11,6 +11,7 @@ from passlib.hash import sha256_crypt
 from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
 
 from managers.authManager import Authorization
+from managers.pushNotificationManager import PushNotificationManager
 
 import logging
 import sys
@@ -60,6 +61,26 @@ class AccountMe(Resource):
         except:
             logging.error('PATCH: %s - %s', sys.exc_info()[0],sys.exc_info()[1])
             return llevameResponse.errorResponse('Error updating user profile', 400)
+
+    @auth.login_required
+    def put(self):
+        logging.info('PUT: %s/me', prefix)
+        db = DataBaseManager()
+        try:
+            user = Authorization().getUserFrom(request)
+            if user is not None:
+                logging.info('Push Notification sent to user')
+                PushNotificationManager().sendUserPush(user['username'],title='test PN')
+            
+            user = Authorization().getDriverFrom(request)
+            if user is not None:
+                logging.info('Push Notification sent to driver')
+                PushNotificationManager().sendDriverPush(user['username'],title='test PN')
+
+            return llevameResponse.successResponse({},200)
+        except:
+            logging.error('PUT: %s - %s', sys.exc_info()[0],sys.exc_info()[1])
+            return llevameResponse.errorResponse('Error trying to send push', 400)
 
 
 class Account(Resource):
