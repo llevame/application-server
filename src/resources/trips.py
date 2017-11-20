@@ -127,10 +127,6 @@ class TripTentative(Resource):
 
             directions = GoogleApiManager().getDirectionsForAddress(startAddress, endAddress)
 
-            if directions is None:
-                logging.info('POST tentative trip - direction not found')
-                directions = []
-                
             responseData = {'directions':directions, 'cost':0}
             return llevameResponse.successResponse(responseData, 200)
             
