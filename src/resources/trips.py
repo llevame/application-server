@@ -33,6 +33,7 @@ def cancelTrip(passenger, tripId):
         logging.info('Trip %s canceled after time out', tripId)
         DataBaseManager().update('trips', tripId,{'status': TripStatusEnum.CANCELED})
         PushNotificationManager().sendTripCanceledPush(passenger, tripId)
+        PushNotificationManager().sendTripCanceledPush((trips[0])['driver'], tripId)
 
 
 
@@ -91,7 +92,8 @@ class Trips(Resource):
             if driver is None:
                 return llevameResponse.errorResponse('Invalid user', 401)
 
-            trips = db.getFrom('trips',{'driver':driver['username']})
+            filterParams = [{'driver':driver['username']}, {'status':TripStatusEnum.CREATED}]
+            trips = db.getFrom('trips',{'$and': filterParams})
             for trip in trips:
                 trip['_id'] = str(trip['_id'])
             return llevameResponse.successResponse(trips,200)            
@@ -100,6 +102,25 @@ class Trips(Resource):
             logging.error('GET: %s - %s', sys.exc_info()[0],sys.exc_info()[1])
             return llevameResponse.errorResponse('Error getting trips for driver', 400)
 
+class TripsHistory(Resource):
+    @auth.login_required
+    def get(self):
+        logging.info('GET: %s/history', prefix)
+        db = DataBaseManager()
+
+        try:
+            driver = Authorization().getDriverFrom(request)
+            if driver is None:
+                return llevameResponse.errorResponse('Invalid user', 401)
+
+            trips = db.getFrom('trips',{'driver':driver['username']})
+            for trip in trips:
+                trip['_id'] = str(trip['_id'])
+            return llevameResponse.successResponse(trips,200)            
+
+        except:
+            logging.error('GET: %s - %s', sys.exc_info()[0],sys.exc_info()[1])
+            return llevameResponse.errorResponse('Error getting trips for driver', 400)
 
 class TripTentative(Resource):
     def post(self):
