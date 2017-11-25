@@ -167,6 +167,7 @@ class Account(Resource):
 		logging.info('POST: %s/%s', prefix, username)
 		db = DataBaseManager()
 		body = request.json
+		
 		sharedResponse = sharedServices.postToShared(apiConfig.SHARED_URL + '/api/users', body, {})
 		print sharedResponse
 		body = request.json

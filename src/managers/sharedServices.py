@@ -2,13 +2,14 @@ from managers.apiConfig import ApiConfig
 import requests
 import json
 
+
 def postToShared(url,body,data):
 	apiConfig = ApiConfig()
-
+	#body["images"] = ["nico" , "test"]
 	print body
-
+	headers = { "Content-type": "application/json" }
 	data["token"] = apiConfig.API_TOKEN
-	r = requests.post(url = url, data = body, params = json.dumps(data))
+	r = requests.post(url = url, json = body, params = json.dumps(data), headers = headers)
 	if r.status_code == 401:
 		params = {'token' : apiConfig.SHARED_TOKEN}
 		r2 = requests.post(url = apiConfig.SHARED_URL + '/api/servers/1', params = params)

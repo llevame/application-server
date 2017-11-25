@@ -59,6 +59,7 @@ if applicationUserRequest.status_code == 201:
 		data = r.json()
 		appConfig.API_TOKEN = data["server"]["token"]["token"]
 		logging.info('Success getting shared token')
+		print appConfig.API_TOKEN
 		print "Success getting shared token"
 	else:
 		logging.error('Error authentication with shared')
