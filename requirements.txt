@@ -37,6 +37,9 @@ pytest-cov==2.5.1
 python-dateutil==2.6.1
 pymongo==3.5.1
 pytz==2014.10
-urllib3
-Werkzeug==0.12.2
 requests
+six==1.10.0
+urllib3==1.22
+Werkzeug==0.12.2
+pyfcm==1.4.3
+googlemaps==2.5.1
