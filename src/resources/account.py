@@ -167,10 +167,7 @@ class Account(Resource):
 		logging.info('POST: %s/%s', prefix, username)
 		db = DataBaseManager()
 		body = request.json
-		
-		sharedResponse = sharedServices.postToShared(apiConfig.SHARED_URL + '/api/users', body, {})
-		print sharedResponse
-		body = request.json
+
 		logging.info('POST: %s/%s - body: %s', prefix, username, str(body))
 		try:
 			if not ('isDriver' in body):
@@ -178,15 +175,34 @@ class Account(Resource):
 				return llevameResponse.errorResponse('isDriver is mandatory', 203)
 
 			isDriver = body['isDriver']
-			if isDriver:
-				return self.signUpDriver(username, body)
+
+			if isDriver == True:
+				if not ('car' in body):
+					return llevameResponse.errorResponse('car is mandatory if it is a driver', 203)
+
+			sharedBody = request.json
+			sharedBody["username"] = username
+			sharedBody["images"] = ["",""]
+			sharedResponse = sharedServices.postToShared(apiConfig.SHARED_URL + '/api/users', sharedBody, {})
+			if sharedResponse["success"] == True:
+				userSharedData = sharedResponse["data"]["user"]
+				print userSharedData
+				userSharedId = userSharedData["id"]
+				body["sharedId"] = userSharedId
+				if isDriver:
+					return self.signUpDriver(username, body)
+				else:
+					return self.signUpPassenger(username, body)
 			else:
-				return self.signUpPassenger(username, body)
+				print sharedResponse["data"]
+				errorMessage = sharedResponse["error"]
+				return llevameResponse.errorResponse("User already exists", 401)
 
 		except:
 			error = 'POST' + str(sys.exc_info()[0]) + "-" + str(sys.exc_info()[1])
 			logging.error(error)
 			return llevameResponse.errorResponse(error, 400)
+
 
 
 	def signUpPassenger(self, username, body):
