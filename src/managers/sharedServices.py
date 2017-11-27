@@ -3,13 +3,16 @@ import requests
 import json
 
 
-def postToShared(url,body,data):
+def postToShared(requestUrl,body,data):
 	apiConfig = ApiConfig()
+	endpoint = apiConfig.SHARED_URL + requestUrl
+	print (requestUrl)
+	print (endpoint)
 	#body["images"] = ["nico" , "test"]
-	print body
+	print (body)
 	headers = { "Content-type": "application/json" }
 	data["token"] = apiConfig.API_TOKEN
-	r = requests.post(url = url, json = body, params = json.dumps(data), headers = headers)
+	r = requests.post(url = endpoint, json = body, params = json.dumps(data), headers = headers)
 	if r.status_code == 401:
 		params = {'token' : apiConfig.SHARED_TOKEN}
 		r2 = requests.post(url = apiConfig.SHARED_URL + '/api/servers/1', params = params)
@@ -18,10 +21,10 @@ def postToShared(url,body,data):
 			apiConfig.API_TOKEN = newTokenData["server"]["token"]["token"]
 			data["token"] = apiConfig.API_TOKEN
 		else:
-			print r2.status_code
+			print (r2.status_code)
 			return {"success" : False, "data": r2.json(), "error": "Error al renovar el token"}
 
-		r = requests.post(url = url, data = body, params = data)
+		r = requests.post(url = endpoint, data = body, params = data)
 	if r.status_code < 400:
 		return {"success" : True , "data" : r.json()}
 	else:
@@ -29,8 +32,9 @@ def postToShared(url,body,data):
 
 def getToShared(url,data):
 	apiConfig = ApiConfig()
+	endpoint = apiConfig.SHARED_URL + url
 	data["token"] = apiConfig.API_TOKEN
-	r = requests.get(url = url, params = data)
+	r = requests.get(url = endpoint, params = data)
 	if r.status_code == 401:
 		params = {'token' : apiConfig.SHARED_TOKEN}
 		r2 = requests.post(url = apiConfig.SHARED_URL + '/api/servers/1', params = params)
@@ -41,7 +45,7 @@ def getToShared(url,data):
 		else:
 			return {"success" : False, "data": r2.json(), "error": "Error al renovar el token"}
 
-		r = requests.post(url = url, data = body, params = data)
+		r = requests.post(url = endpoint, data = body, params = data)
 	if r.status_code < 400:
 		return {"success" : True , "data" : r.json()}
 	else:

@@ -36,6 +36,17 @@ class AccountMe(Resource):
                 return llevameResponse.errorResponse('Invalid user', 403)
 
             user.pop('_id')
+            user.pop('password')
+            sharedResponse = sharedServices.getToShared("/api/users/" + str(user["sharedId"]), {})
+            if sharedResponse["success"] == True:
+            	userShared = sharedResponse["data"]["user"]
+            	userShared.pop('id')
+            	userShared.pop('_ref')
+            	userShared.pop('applicationOwner')
+            	userShared.update(user)
+            	user = userShared
+            else:
+            	loggin.error('Error getting user from shared server')
             return llevameResponse.successResponse(user,200)
         except:
             logging.error('GET: %s - %s', sys.exc_info()[0],sys.exc_info()[1])
@@ -204,18 +215,16 @@ class Account(Resource):
 			sharedBody = request.json
 			sharedBody["username"] = username
 			sharedBody["images"] = ["",""]
-			sharedResponse = sharedServices.postToShared(apiConfig.SHARED_URL + '/api/users', sharedBody, {})
+			sharedResponse = sharedServices.postToShared('/api/users', sharedBody, {})
 			if sharedResponse["success"] == True:
-				userSharedData = sharedResponse["data"]["user"]
-				print userSharedData
-				userSharedId = userSharedData["id"]
+				userSharedId = sharedResponse["data"]["user"]["id"]
 				body["sharedId"] = userSharedId
 				if isDriver:
 					return self.signUpDriver(username, body)
 				else:
 					return self.signUpPassenger(username, body)
 			else:
-				print sharedResponse["data"]
+				print (sharedResponse["data"])
 				errorMessage = sharedResponse["error"]
 				return llevameResponse.errorResponse("User already exists", 401)
 
