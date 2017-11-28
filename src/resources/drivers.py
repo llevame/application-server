@@ -52,7 +52,7 @@ class DriversProfile(Resource):
                     userShared.pop('_ref')
                     userShared.pop('applicationOwner')
                     userShared.update(driver)
-                    user = userShared
+                    driver = userShared
                 else:
                     loggin.error('Error getting user from shared server')
                 makeUserSecure(driver)

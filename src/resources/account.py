@@ -211,6 +211,12 @@ class Account(Resource):
 			if isDriver == True:
 				if not ('car' in body):
 					return llevameResponse.errorResponse('car is mandatory if it is a driver', 203)
+				auxCar = body['car']
+				body.pop('car')
+				body['cars'] = [auxCar]
+			else:
+				if ('car' in body):
+					body.pop('car')
 
 			sharedBody = request.json
 			sharedBody["username"] = username
