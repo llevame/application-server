@@ -220,7 +220,7 @@ class Account(Resource):
 
 			sharedBody = request.json
 			sharedBody["username"] = username
-			sharedBody["images"] = ["",""]
+			sharedBody["images"] = []
 			sharedResponse = sharedServices.postToShared('/api/users', sharedBody, {})
 			if sharedResponse["success"] == True:
 				userSharedId = sharedResponse["data"]["user"]["id"]

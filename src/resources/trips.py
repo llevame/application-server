@@ -7,6 +7,7 @@ from managers.dataBaseManager import DataBaseManager
 from managers.authManager import Authorization
 from managers.pushNotificationManager import PushNotificationManager
 from managers.googleApiManager import GoogleApiManager
+from managers import sharedServices
 
 from enum import IntEnum
 from threading import Timer
@@ -61,18 +62,76 @@ class Trips(Resource):
 
             drivers = db.getFrom('drivers',{'username':body['driver']})
             if len(drivers) == 1:
-                body = {'driver':body['driver'], 'passenger': user['username'], 'trip': body['trip'], 'time':time.time()}
-                body['status'] = TripStatusEnum.CREATED
+                driverSharedId = drivers[0]['sharedId']
+                passengerSharedId = user['sharedId']
+                #Creo el body para el shared
+                start = body['trip'][0]
+                end = body['trip'][-1]
+                startAddress = GoogleApiManager().getAddressForLocation(start)
+                endAddress = GoogleApiManager().getAddressForLocation(end)
+                startData = {
+                    "address" : {
+                        "street" : startAddress,
+                        "location" : {
+                            "lat" : start["latitude"],
+                            "lon" : start["longitude"]
+                        }
+                    },
+                    'timestamp' : time.time()
+                }
+                endData = {
+                    "address" : {
+                        "street" : endAddress,
+                        "location" : {
+                            "lat" : end["latitude"],
+                            "lon" : end["longitude"]
+                        }
+                    },
+                    "timestamp": time.time()
+                }
+                route = []
+                for trip in body['trip']:
+                    route.append({
+                        'location': {
+                            'lat':trip["latitude"], 
+                            'lon':trip["longitude"]
+                            },
+                        'timestamp' : time.time()
+                        })
+                tripSharedBody = {
+                    'trip': {
+                        'driver': driverSharedId,
+                        'passenger': passengerSharedId,
+                        'start': startData,
+                        'end': endData,
+                        "totalTime": 0,
+                        "waitTime": 0,
+                        "travelTime": 0,
+                        "distance": 1,
+                        "route": route
+                    },
+                    "paymethod": {
+                        "paymethod": "cash"
+                    }
 
-                tripIds = db.postTo('trips',[body])
-                tripId = str(tripIds[0])
-                PushNotificationManager().sendNewTripPush(body['driver'], tripId)
+                }
+                sharedResponse = sharedServices.postToShared('/api/trips', tripSharedBody, {})
 
-                timer = Timer(1 * 60, cancelTrip, [user['username'], tripId])
-                timer.start()
+                if sharedResponse['success'] == True:
+                    body = {'driver':body['driver'], 'passenger': user['username'], 'trip': body['trip'], 'time':time.time()}
+                    body['status'] = TripStatusEnum.CREATED
 
-                responseData = {'tripId': tripId}
-                return llevameResponse.successResponse(responseData,200)
+                    tripIds = db.postTo('trips',[body])
+                    tripId = str(tripIds[0])
+                    PushNotificationManager().sendNewTripPush(body['driver'], tripId)
+
+                    timer = Timer(1 * 60, cancelTrip, [user['username'], tripId])
+                    timer.start()
+
+                    responseData = {'tripId': tripId}
+                    return llevameResponse.successResponse(responseData,200)
+                else:
+                    llevameResponse.errorResponse('Error saving trip in server', 500)
             
             return llevameResponse.errorResponse('There is no driver', 201)
         except:

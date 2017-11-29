@@ -6,13 +6,9 @@ import json
 def postToShared(requestUrl,body,data):
 	apiConfig = ApiConfig()
 	endpoint = apiConfig.SHARED_URL + requestUrl
-	print (requestUrl)
-	print (endpoint)
-	#body["images"] = ["nico" , "test"]
-	print (body)
 	headers = { "Content-type": "application/json" }
 	data["token"] = apiConfig.API_TOKEN
-	r = requests.post(url = endpoint, json = body, params = json.dumps(data), headers = headers)
+	r = requests.post(url = endpoint, json = body, params = data)
 	if r.status_code == 401:
 		params = {'token' : apiConfig.SHARED_TOKEN}
 		r2 = requests.post(url = apiConfig.SHARED_URL + '/api/servers/1', params = params)
@@ -21,7 +17,6 @@ def postToShared(requestUrl,body,data):
 			apiConfig.API_TOKEN = newTokenData["server"]["token"]["token"]
 			data["token"] = apiConfig.API_TOKEN
 		else:
-			print (r2.status_code)
 			return {"success" : False, "data": r2.json(), "error": "Error al renovar el token"}
 
 		r = requests.post(url = endpoint, data = body, params = data)
