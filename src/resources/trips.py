@@ -151,8 +151,10 @@ class TripTentative(Resource):
                 return llevameResponse.errorResponse('Invalid end point', 403)
 
             directions = GoogleApiManager().getDirectionsForAddress(startAddress, endAddress)
+            matrix = GoogleApiManager().getDistanceMatrix(startAddress, endAddress)
 
             responseData = {'directions':directions, 'cost':0}
+            responseData.update(matrix)
             return llevameResponse.successResponse(responseData, 200)
             
         except:
