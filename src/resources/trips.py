@@ -119,56 +119,7 @@ class Trips(Resource):
                 passengerSharedId = user['sharedId']
                 #Creo el body para el shared
                 tripBody = tripSharedBody(passengerSharedId,driverSharedId,body['trip'])
-                # start = body['trip'][0]
-                # end = body['trip'][-1]
-                # startAddress = GoogleApiManager().getAddressForLocation(start)
-                # endAddress = GoogleApiManager().getAddressForLocation(end)
-                # startData = {
-                #     "address" : {
-                #         "street" : startAddress,
-                #         "location" : {
-                #             "lat" : start["latitude"],
-                #             "lon" : start["longitude"]
-                #         }
-                #     },
-                #     'timestamp' : time.time()
-                # }
-                # endData = {
-                #     "address" : {
-                #         "street" : endAddress,
-                #         "location" : {
-                #             "lat" : end["latitude"],
-                #             "lon" : end["longitude"]
-                #         }
-                #     },
-                #     "timestamp": time.time()
-                # }
-                # route = []
-                # for trip in body['trip']:
-                #     route.append({
-                #         'location': {
-                #             'lat':trip["latitude"], 
-                #             'lon':trip["longitude"]
-                #             },
-                #         'timestamp' : time.time()
-                #         })
-                # tripSharedBody = {
-                #     'trip': {
-                #         'driver': driverSharedId,
-                #         'passenger': passengerSharedId,
-                #         'start': startData,
-                #         'end': endData,
-                #         "totalTime": 0,
-                #         "waitTime": 0,
-                #         "travelTime": 0,
-                #         "distance": 1,
-                #         "route": route
-                #     },
-                #     "paymethod": {
-                #         "paymethod": "cash"
-                #     }
 
-                # }
                 sharedResponse = sharedServices.postToShared('/api/trips', tripBody, {})
 
                 if sharedResponse['success'] == True:
