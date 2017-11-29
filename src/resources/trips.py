@@ -36,6 +36,36 @@ def cancelTrip(passenger, tripId):
         PushNotificationManager().sendTripCanceledPush(passenger, tripId)
         PushNotificationManager().sendTripCanceledPush((trips[0])['driver'], tripId)
 
+def estimatedTripSharedBody(passenger, start, end):
+    startAddress = GoogleApiManager().getAddressForLocation(start)
+    endAddress = GoogleApiManager().getAddressForLocation(end)
+    startData = {
+        "address" : {
+            "street" : startAddress,
+            "location" : {
+                "lat" : start["latitude"],
+                "lon" : start["longitude"]
+            }
+        },
+        'timestamp' : time.time()
+    }
+    endData = {
+        "address" : {
+            "street" : endAddress,
+            "location" : {
+                "lat" : end["latitude"],
+                "lon" : end["longitude"]
+            }
+        }
+    }
+    tripSharedBody = {
+        'passenger': passenger,
+        'start': startData,
+        'end': endData
+    }
+
+    return tripSharedBody
+
 def tripSharedBody(passenger, driver, tripPoints):
     start = tripPoints[0]
     end = tripPoints[-1]
@@ -217,6 +247,11 @@ class TripTentative(Resource):
             directions = GoogleApiManager().getDirectionsForAddress(startAddress, endAddress)
 
             responseData = {'directions':directions, 'cost':0}
+
+            estimatedTripShared = estimatedTripSharedBody(user['sharedId'], body['start'], body['end'])
+            sharedResponse = sharedServices.postToShared('/api/trips/estimate', estimatedTripShared, {})
+            if sharedResponse['success'] == True:
+                responseData['cost'] = sharedResponse['data']['cost']['value']
             return llevameResponse.successResponse(responseData, 200)
             
         except:
