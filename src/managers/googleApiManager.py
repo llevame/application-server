@@ -13,9 +13,23 @@ class GoogleApiManager:
 			return reverse[0]['formatted_address']
 		return None
 
+	def getDistanceMatrix(self, start, end):
+		gmaps = googlemaps.Client(key=self.apiKey)
+		matrix = gmaps.distance_matrix(start, end, mode="driving", units="metric")
+		elements = matrix['rows'][0]['elements'][0] # just one pair of start-end
+
+		response = {"distance":0, "duration":0}
+		if 'distance' in elements:
+			response['distance'] = elements['distance']['value'] # seconds
+		if 'duration' in elements:
+			response['duration'] = elements['duration']['value'] # meters
+
+		return response
+
 	def getDirectionsForAddress(self, start, end):
 		gmaps = googlemaps.Client(key=self.apiKey)
-		directions  = gmaps.directions(start, end, alternatives=True)
+		directions = gmaps.directions(start, end, alternatives=True)
+
 		roads = []
 		for direction in directions:	# directions -> list of dictionaries
 			road = []

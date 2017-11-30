@@ -66,11 +66,13 @@ def estimatedTripSharedBody(passenger, start, end):
 
     return tripSharedBody
 
-def tripSharedBody(passenger, driver, tripPoints):
+def tripSharedBody(passenger, driver, tripPoints, timeTripStarted):
     start = tripPoints[0]
     end = tripPoints[-1]
+    totalTimeTrip = int(time.time() - timeTripStarted)
     startAddress = GoogleApiManager().getAddressForLocation(start)
     endAddress = GoogleApiManager().getAddressForLocation(end)
+    matrix = GoogleApiManager().getDistanceMatrix(startAddress, endAddress)
     startData = {
         "address" : {
             "street" : startAddress,
@@ -79,7 +81,7 @@ def tripSharedBody(passenger, driver, tripPoints):
                 "lon" : start["longitude"]
             }
         },
-        'timestamp' : time.time()
+        'timestamp' : timeTripStarted
     }
     endData = {
         "address" : {
@@ -106,10 +108,10 @@ def tripSharedBody(passenger, driver, tripPoints):
             'passenger': passenger,
             'start': startData,
             'end': endData,
-            "totalTime": 0,
+            "totalTime": totalTimeTrip,
             "waitTime": 0,
-            "travelTime": 0,
-            "distance": 1,
+            "travelTime": totalTimeTrip,
+            "distance": matrix['distance'],
             "route": route
         },
         "paymethod": {
@@ -153,6 +155,7 @@ class Trips(Resource):
                 sharedResponse = sharedServices.postToShared('/api/trips', tripBody, {})
 
                 if sharedResponse['success'] == True:
+                    print(sharedResponse)
                     body = {'driver':body['driver'], 'passenger': user['username'], 'trip': body['trip'], 'time':time.time()}
                     body['status'] = TripStatusEnum.CREATED
 
@@ -166,7 +169,7 @@ class Trips(Resource):
                     responseData = {'tripId': tripId}
                     return llevameResponse.successResponse(responseData,200)
                 else:
-                    llevameResponse.errorResponse('Error saving trip in server', 500)
+                    return llevameResponse.errorResponse('Error saving trip in server', 500)
             
             return llevameResponse.errorResponse('There is no driver', 201)
         except:
@@ -245,13 +248,13 @@ class TripTentative(Resource):
                 return llevameResponse.errorResponse('Invalid end point', 403)
 
             directions = GoogleApiManager().getDirectionsForAddress(startAddress, endAddress)
-
+            matrix = GoogleApiManager().getDistanceMatrix(startAddress, endAddress)
             responseData = {'directions':directions, 'cost':0}
-
             estimatedTripShared = estimatedTripSharedBody(user['sharedId'], body['start'], body['end'])
             sharedResponse = sharedServices.postToShared('/api/trips/estimate', estimatedTripShared, {})
             if sharedResponse['success'] == True:
                 responseData['cost'] = sharedResponse['data']['cost']['value']
+            responseData.update(matrix)
             return llevameResponse.successResponse(responseData, 200)
             
         except:
@@ -274,6 +277,10 @@ class TripStatus(Resource):
                 trip = trips[0]
 
                 driver = Authorization().getDriverFrom(request)
+                users = DataBaseManager().getFrom('users',{'username':trip['passenger']})
+                if len(users) < 1:
+                    return llevameResponse.errorResponse('Invalid user in trip', 401)
+                user = users[0]
                 if driver is None or (trip['driver'] != driver['username']): 
                     logging.info('PATCH: %s/status - error: invalid user', prefix)
                     return llevameResponse.errorResponse('Invalid user', 401)
@@ -296,10 +303,21 @@ class TripStatus(Resource):
                     return llevameResponse.successResponse({'tripId':tripId},200)
 
                 if newStatus == TripStatusEnum.FINISHED and actualStatus == TripStatusEnum.IN_PROGRESS:
-                    DataBaseManager().update('trips', str(trip["_id"]),{'status':newStatus})
+                    driverUsername = driver['username']
+                    road = trip['road'][driverUsername]
+                    timeStarted = trip['time']
+
+                    tripBodyShared = tripSharedBody(user['sharedId'], driver['sharedId'],road,timeStarted)
+                    sharedResponse = sharedServices.postToShared('/api/trips',tripBodyShared,{})
+                    if sharedResponse['success'] == False:
+                        return llevameResponse.errorResponse('Error saving trip in server', 500)
+
+                    tripCost = sharedResponse['data']['trip']['cost']['value']
+                    tripSharedId = sharedResponse['data']['trip']['id'][0]
+                    DataBaseManager().update('trips', str(trip["_id"]),{'status':newStatus, 'cost':tripCost, 'sharedId':tripSharedId})
                     PushNotificationManager().sendTripFinishedPush(trip["passenger"], tripId)
                     logging.info('PATCH: %s/status - trip finished', prefix)
-                    return llevameResponse.successResponse({'tripId':tripId},200)
+                    return llevameResponse.successResponse({'tripId':tripId, 'cost': tripCost},200)
 
                 if newStatus == TripStatusEnum.CANCELED:
                     # TODO: Define what to do if trip was in progress and was caneled
