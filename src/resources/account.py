@@ -214,13 +214,18 @@ class Account(Resource):
 				auxCar = body['car']
 				body.pop('car')
 				body['cars'] = [auxCar]
+				userType = "driver"
 			else:
+				userType = "passenger"
 				if ('car' in body):
 					body.pop('car')
 
 			sharedBody = request.json
+			sharedBody["type"] = userType
 			sharedBody["username"] = username
 			sharedBody["images"] = []
+			sharedBody['country'] = 'Argentina'
+			sharedBody["birthdate"] = "23/2/1999"
 			sharedResponse = sharedServices.postToShared('/api/users', sharedBody, {})
 			if sharedResponse["success"] == True:
 				userSharedId = sharedResponse["data"]["user"]["id"]

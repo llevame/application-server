@@ -18,12 +18,10 @@ def postToShared(requestUrl,body,data):
 			data["token"] = apiConfig.API_TOKEN
 		else:
 			return {"success" : False, "data": r2.json(), "error": "Error al renovar el token"}
-
 		r = requests.post(url = endpoint, json = body, params = data)
 	if r.status_code < 400:
 		return {"success" : True , "data" : r.json()}
 	else:
-		print('murio')
 		return {"success" : False, "data": r.json(), "error": "Error al traer la info del shared"}
 
 def getToShared(url,data):
