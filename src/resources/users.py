@@ -1,36 +1,59 @@
 from flask_restful import Resource
+from flask import jsonify
+from flask import request
+from bson.json_util import loads
+from bson.objectid import ObjectId
+from managers import sharedServices
+from . import llevameResponse
+from managers.dataBaseManager import DataBaseManager
+from managers.authManager import Authorization
+
+
 import logging
+import sys
 
 prefix = "/api/v1/users"
+auth = Authorization().auth
 
-class Users(Resource):
 
-    def get(self):
-        logging.info('GET: %s', prefix)
-        return 'GET request on ' + prefix
-    
-    def post(self):
-        logging.info('POST: %s', prefix)
-        return 'POST request on ' + prefix
+def makeUserSecure(user):
+    user.pop("_id", None)
+    user.pop("password", None)
+    user.pop("token", None)
+    user.pop("fb_token", None)
 
 class UsersValidate(Resource):
     def post(self):
         logging.info('POST: %s/validate', prefix)
         return 'POST request on ' + prefix + '/validate'
 
-class UsersIds(Resource):
-
+class UsersProfile(Resource):
+    @auth.login_required
     def get(self, userId):
-        logging.info('GET: %s/%s', prefix, userId)
-        return 'GET request on ' + prefix + '/' + str(userId)
-    
-    def put(self, userId):
-        logging.info('PUT: %s/%s', prefix, userId)
-        return 'PUT request on ' + prefix + '/' + str(userId)
-    
-    def delete(self, userId):
-        logging.info('DELETE: %s/%s', prefix, userId)
-        return 'DELETE request on ' + prefix + '/' + str(userId)
+        logging.info('GET: %s/%s/profile', prefix, userId)
+        db = DataBaseManager()
+        try:
+            user = db.getFrom('users',{'username':userId})
+            if len(user) == 1:
+                user = user[0]
+                sharedResponse = sharedServices.getToShared("/api/users/" + str(user["sharedId"]), {})
+                if sharedResponse["success"] == True:
+                    userShared = sharedResponse["data"]["user"]
+                    userShared.pop('id')
+                    userShared.pop('_ref')
+                    userShared.pop('cars')
+                    userShared.pop('applicationOwner')
+                    userShared.update(user)
+                    user = userShared
+                else:
+                    loggin.error('Error getting user from shared server')
+                makeUserSecure(user)
+                return llevameResponse.successResponse(user,200)
+            else:
+                return llevameResponse.errorResponse('Error finding User', 400)
+        except:
+            logging.error('GET: %s - %s', sys.exc_info()[0],sys.exc_info()[1])
+            return llevameResponse.errorResponse('Error finding User', 400)
 
 class UsersIdsCars(Resource):
 
