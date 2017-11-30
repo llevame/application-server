@@ -147,29 +147,19 @@ class Trips(Resource):
 
             drivers = db.getFrom('drivers',{'username':body['driver']})
             if len(drivers) == 1:
-                driverSharedId = drivers[0]['sharedId']
-                passengerSharedId = user['sharedId']
-                #Creo el body para el shared
-                tripBody = tripSharedBody(passengerSharedId,driverSharedId,body['trip'])
+                body = {'driver':body['driver'], 'passenger': user['username'], 'trip': body['trip'], 'time':time.time()}
+                body['status'] = TripStatusEnum.CREATED
 
-                sharedResponse = sharedServices.postToShared('/api/trips', tripBody, {})
+                tripIds = db.postTo('trips',[body])
+                tripId = str(tripIds[0])
+                PushNotificationManager().sendNewTripPush(body['driver'], tripId)
 
-                if sharedResponse['success'] == True:
-                    print(sharedResponse)
-                    body = {'driver':body['driver'], 'passenger': user['username'], 'trip': body['trip'], 'time':time.time()}
-                    body['status'] = TripStatusEnum.CREATED
+                timer = Timer(1 * 60, cancelTrip, [user['username'], tripId])
+                timer.start()
 
-                    tripIds = db.postTo('trips',[body])
-                    tripId = str(tripIds[0])
-                    PushNotificationManager().sendNewTripPush(body['driver'], tripId)
-
-                    timer = Timer(1 * 60, cancelTrip, [user['username'], tripId])
-                    timer.start()
-
-                    responseData = {'tripId': tripId}
-                    return llevameResponse.successResponse(responseData,200)
-                else:
-                    return llevameResponse.errorResponse('Error saving trip in server', 500)
+                responseData = {'tripId': tripId}
+                return llevameResponse.successResponse(responseData,200)
+     
             
             return llevameResponse.errorResponse('There is no driver', 201)
         except:
