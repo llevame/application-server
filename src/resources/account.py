@@ -1,12 +1,12 @@
 from flask_restful import Resource
 from flask import jsonify
 from flask import request
-
+from managers.apiConfig import ApiConfig
 from bson.json_util import loads
 from bson.objectid import ObjectId
 from . import llevameResponse
 from managers.dataBaseManager import DataBaseManager
-
+from managers import sharedServices
 from passlib.hash import sha256_crypt
 from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
 
@@ -18,6 +18,7 @@ import sys
 
 prefix = "/api/v1/account"
 auth = Authorization().auth
+apiConfig = ApiConfig()
 
 AppKey = "asdasdadsasdasd"
 
@@ -35,6 +36,17 @@ class AccountMe(Resource):
                 return llevameResponse.errorResponse('Invalid user', 403)
 
             user.pop('_id')
+            user.pop('password')
+            sharedResponse = sharedServices.getToShared("/api/users/" + str(user["sharedId"]), {})
+            if sharedResponse["success"] == True:
+            	userShared = sharedResponse["data"]["user"]
+            	userShared.pop('id')
+            	userShared.pop('_ref')
+            	userShared.pop('applicationOwner')
+            	userShared.update(user)
+            	user = userShared
+            else:
+            	loggin.error('Error getting user from shared server')
             return llevameResponse.successResponse(user,200)
         except:
             logging.error('GET: %s - %s', sys.exc_info()[0],sys.exc_info()[1])
@@ -184,7 +196,10 @@ class Account(Resource):
 
 	# Sign up user
 	def post(self, username):
+		logging.info('POST: %s/%s', prefix, username)
+		db = DataBaseManager()
 		body = request.json
+
 		logging.info('POST: %s/%s - body: %s', prefix, username, str(body))
 		try:
 			if not ('isDriver' in body):
@@ -192,15 +207,38 @@ class Account(Resource):
 				return llevameResponse.errorResponse('isDriver is mandatory', 203)
 
 			isDriver = body['isDriver']
-			if isDriver:
-				return self.signUpDriver(username, body)
+
+			if isDriver == True:
+				if not ('car' in body):
+					return llevameResponse.errorResponse('car is mandatory if it is a driver', 203)
+				auxCar = body['car']
+				body.pop('car')
+				body['cars'] = [auxCar]
 			else:
-				return self.signUpPassenger(username, body)
+				if ('car' in body):
+					body.pop('car')
+
+			sharedBody = request.json
+			sharedBody["username"] = username
+			sharedBody["images"] = []
+			sharedResponse = sharedServices.postToShared('/api/users', sharedBody, {})
+			if sharedResponse["success"] == True:
+				userSharedId = sharedResponse["data"]["user"]["id"]
+				body["sharedId"] = userSharedId
+				if isDriver:
+					return self.signUpDriver(username, body)
+				else:
+					return self.signUpPassenger(username, body)
+			else:
+				print (sharedResponse["data"])
+				errorMessage = sharedResponse["error"]
+				return llevameResponse.errorResponse("User already exists", 401)
 
 		except:
 			error = 'POST' + str(sys.exc_info()[0]) + "-" + str(sys.exc_info()[1])
 			logging.error(error)
 			return llevameResponse.errorResponse(error, 400)
+
 
 
 	def signUpPassenger(self, username, body):

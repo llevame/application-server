@@ -17,7 +17,6 @@ class GoogleApiManager:
 		gmaps = googlemaps.Client(key=self.apiKey)
 		matrix = gmaps.distance_matrix(start, end, mode="driving", units="metric")
 		elements = matrix['rows'][0]['elements'][0] # just one pair of start-end
-		print(elements)
 
 		response = {"distance":0, "duration":0}
 		if 'distance' in elements:

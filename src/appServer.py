@@ -13,6 +13,7 @@ from resources.users import UsersIdsCarsIds
 from resources.users import UsersIdsTransactions
 
 from resources.drivers import Drivers
+
 from resources.drivers import DriversProfile
 
 from resources.trips import Trips
@@ -20,6 +21,7 @@ from resources.trips import TripsHistory
 from resources.trips import TripTentative
 from resources.trips import TripStatus
 from resources.trips import TripsIds
+from managers.apiConfig import ApiConfig
 
 from resources.paymethods import Paymethods
 
@@ -27,15 +29,45 @@ from resources.servers import ServersPing
 
 import logging
 import os
+import requests
 
 app = Flask(__name__)
 api = Api(app)
+SHARED_TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MCwicm9sZXMiOlsiYWRtaW4iXSwiaWF0IjoxNTA5OTM2MjA1LCJleHAiOjE1MTAxMDg4NDJ9.kkn0BtV-icJsE1Dj4EGGi3ktkPkQtFVeFqBt-jTufxU"
+
+API_TOKEN = ""
 
 prefix = "/api/v1"
 
 # logs
 if not os.path.exists("../logs"):
     os.makedirs("../logs")
+appConfig = ApiConfig()
+# Getting shared token
+applicationParams = {
+	'username' : "dymloz",
+	'password' : "dymloz91"
+}
+applicationUserRequest = requests.post(url = appConfig.SHARED_URL + '/api/token', data = applicationParams)
+if applicationUserRequest.status_code == 201:
+	data = applicationUserRequest.json()
+	appConfig.SHARED_TOKEN = data["token"]["token"]
+
+	params = {'token' : appConfig.SHARED_TOKEN}
+	r = requests.post(url = appConfig.SHARED_URL + '/api/servers/1', params = params)
+	if r.status_code == 201:
+		data = r.json()
+		appConfig.API_TOKEN = data["server"]["token"]["token"]
+		logging.info('Success getting shared token')
+		print ("Success getting shared token")
+	else:
+		logging.error('Error authentication with shared')
+		print ("Error authentication with shared")
+else:
+	print (applicationUserRequest.json())
+	logging.error('Error getting token for shared')
+	print ("Error getting token for shared")
+
 
 log = open("../logs/appServer.log", "w")
 log.close()

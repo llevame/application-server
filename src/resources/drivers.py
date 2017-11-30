@@ -2,6 +2,7 @@ from flask_restful import Resource
 from flask import jsonify
 from flask import request
 from bson.json_util import loads
+from managers import sharedServices
 from bson.objectid import ObjectId
 from . import llevameResponse
 from managers.dataBaseManager import DataBaseManager
@@ -44,6 +45,16 @@ class DriversProfile(Resource):
             driver = db.getFrom('drivers',{'username':driverId})
             if len(driver) == 1:
                 driver = driver[0]
+                sharedResponse = sharedServices.getToShared("/api/users/" + str(driver["sharedId"]), {})
+                if sharedResponse["success"] == True:
+                    userShared = sharedResponse["data"]["user"]
+                    userShared.pop('id')
+                    userShared.pop('_ref')
+                    userShared.pop('applicationOwner')
+                    userShared.update(driver)
+                    driver = userShared
+                else:
+                    loggin.error('Error getting user from shared server')
                 makeUserSecure(driver)
                 return llevameResponse.successResponse(driver,200)
             else:

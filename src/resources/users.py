@@ -3,6 +3,7 @@ from flask import jsonify
 from flask import request
 from bson.json_util import loads
 from bson.objectid import ObjectId
+from managers import sharedServices
 from . import llevameResponse
 from managers.dataBaseManager import DataBaseManager
 from managers.authManager import Authorization
@@ -35,6 +36,17 @@ class UsersProfile(Resource):
             user = db.getFrom('users',{'username':userId})
             if len(user) == 1:
                 user = user[0]
+                sharedResponse = sharedServices.getToShared("/api/users/" + str(user["sharedId"]), {})
+                if sharedResponse["success"] == True:
+                    userShared = sharedResponse["data"]["user"]
+                    userShared.pop('id')
+                    userShared.pop('_ref')
+                    userShared.pop('cars')
+                    userShared.pop('applicationOwner')
+                    userShared.update(user)
+                    user = userShared
+                else:
+                    loggin.error('Error getting user from shared server')
                 makeUserSecure(user)
                 return llevameResponse.successResponse(user,200)
             else:
