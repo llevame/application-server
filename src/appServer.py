@@ -64,7 +64,7 @@ if applicationUserRequest.status_code == 201:
 		logging.error('Error authentication with shared')
 		print ("Error authentication with shared")
 else:
-	print (applicationUserRequest.json())
+	print (applicationUserRequest.text)
 	logging.error('Error getting token for shared')
 	print ("Error getting token for shared")
 
