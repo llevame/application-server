@@ -214,6 +214,7 @@ class Account(Resource):
 				if not ('car' in body):
 					return llevameResponse.errorResponse('car is mandatory if it is a driver', 203)
 				auxCar = body['car']
+				sharedBody.pop('car')
 				sharedBody['cars'] = [auxCar]
 				userType = "driver"
 			else:
@@ -236,7 +237,6 @@ class Account(Resource):
 				else:
 					return self.signUpPassenger(username, body)
 			else:
-				print (sharedResponse["data"])
 				errorMessage = sharedResponse["error"]
 				return llevameResponse.errorResponse("User already exists", 401)
 

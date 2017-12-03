@@ -73,6 +73,9 @@ def tripSharedBody(passenger, driver, tripPoints, timeTripStarted):
     startAddress = GoogleApiManager().getAddressForLocation(start)
     endAddress = GoogleApiManager().getAddressForLocation(end)
     matrix = GoogleApiManager().getDistanceMatrix(startAddress, endAddress)
+    tripDistance = matrix['distance']
+    if tripDistance <= 0:
+        tripDistance = 1
     startData = {
         "address" : {
             "street" : startAddress,
@@ -111,7 +114,7 @@ def tripSharedBody(passenger, driver, tripPoints, timeTripStarted):
             "totalTime": totalTimeTrip,
             "waitTime": 0,
             "travelTime": totalTimeTrip,
-            "distance": matrix['distance'],
+            "distance": tripDistance,
             "route": route
         },
         "paymethod": {
