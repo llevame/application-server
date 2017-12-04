@@ -11,7 +11,7 @@ from resources.users import UsersProfile
 from resources.users import UsersIdsCars
 from resources.users import UsersIdsCarsIds
 from resources.users import UsersIdsTransactions
-
+from resources.account import FacebookUser
 from resources.drivers import Drivers
 
 from resources.drivers import DriversProfile
@@ -87,6 +87,9 @@ api.add_resource(UsersProfile, '{}/users/<string:userId>/profile'.format(prefix)
 api.add_resource(UsersIdsCars, '{}/users/<int:userId>/cars'.format(prefix))
 api.add_resource(UsersIdsCarsIds, '{}/users/<int:userId>/cars/<int:carId>'.format(prefix))
 api.add_resource(UsersIdsTransactions, '{}/users/<int:userId>/transactions'.format(prefix))
+
+# Facebook endpoints
+api.add_resource(FacebookUser, '{}/facebookUsers'.format(prefix))
 
 # Trips endpoints
 api.add_resource(Trips, '{}/trips'.format(prefix))

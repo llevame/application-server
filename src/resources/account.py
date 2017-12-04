@@ -13,6 +13,8 @@ from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
 from managers.authManager import Authorization
 from managers.pushNotificationManager import PushNotificationManager
 
+import requests
+import time
 import logging
 import sys
 
@@ -160,15 +162,15 @@ class Account(Resource):
 				return llevameResponse.successResponse(dataResponse,200)
 			return llevameResponse.errorResponse('Wrong password', 401)
 
-		elif 'fb_token' in user and 'fb_token' in body:
+		elif 'fb_token' in body and 'fb_id' in user:
 			# Facebook user
-			if user['fb_token'] == body['fb_token']:			
-				newToken = Account().getToken(user['username'])
-				DataBaseManager().update('users', str(user["_id"]), {'token': newToken})
+		
+			newToken = Account().getToken(user['username'])
+			DataBaseManager().update('users', str(user["_id"]), {'token': newToken, 'fb_token': body['fb_token']})
 
-				dataResponse = {'token': newToken, 'isDriver': False}
-				return llevameResponse.successResponse(dataResponse,200)
-			return llevameResponse.errorResponse('Invalid facebook token', 401)
+			dataResponse = {'token': newToken, 'isDriver': False}
+			return llevameResponse.successResponse(dataResponse,200)
+
 
 		return llevameResponse.errorResponse('Error finding User. Needs password or fb token', 400)
 
@@ -245,8 +247,7 @@ class Account(Resource):
 			logging.error(error)
 			return llevameResponse.errorResponse(error, 400)
 
-
-
+	
 	def signUpPassenger(self, username, body):
 		user = DataBaseManager().getFrom('users',{'username':username})
 		if len(user) >= 1:
@@ -329,3 +330,62 @@ class Account(Resource):
 			logging.error('Sign up user: cant get pass from hash')
 			return llevameResponse.errorResponse('Internal error', 500)
 
+class FacebookUser(Resource):
+    def post(self):
+        body = request.get_json()
+        if not ('fb_token') in body:
+            return llevameResponse.errorResponse('authToken is mandatory', 400)
+        authToken = body['fb_token']
+        data = {
+            'fields' : 'id,last_name,first_name,email,name',
+            'access_token' : authToken
+        }
+        facebookURLRequest = 'https://graph.facebook.com/me'
+        r = requests.get(url = facebookURLRequest, params=data)
+        if r.status_code == 200:
+            fbResponse = r.json()
+            fbId = fbResponse['id']
+            db = DataBaseManager()
+            user = db.getFrom('users',{'fb_id':fbId})
+            if len(user) == 1:
+            	return Account().loginPassenger(user[0],body)
+            else:
+                name = fbResponse['name']
+                firstName = fbResponse['first_name']
+                lastName = fbResponse['last_name']
+                if not ('email' in fbResponse):
+                    email = firstName + lastName + '@gmail.com'
+                else:
+                    email = fbResponse['email']
+                username = name + str(time.time())
+                signUpBody = {
+                	'firstName' : firstName,
+                	'lastName' : lastName,
+                	'email' : email,
+                	'isDriver' : False
+                }
+                sharedBody = signUpBody.copy()
+                sharedBody["type"] = "passenger"
+                sharedBody["username"] = username
+                sharedBody["images"] = []
+                sharedBody['country'] = 'Argentina'
+                sharedBody["birthdate"] = "23/2/1999"
+                sharedBody['password'] = "asdf"
+                sharedBody['fb'] = { 
+                	'userId' : fbId,
+                	'authToken' : authToken
+                }
+
+                signUpBody['fb_token'] = authToken
+                signUpBody['fb_id'] = fbId
+
+                sharedResponse = sharedServices.postToShared('/api/users', sharedBody, {})
+                if sharedResponse["success"] == True:
+                	userSharedId = sharedResponse["data"]["user"]["id"]
+                	signUpBody["sharedId"] = userSharedId
+                	return Account().signUpPassenger(username, signUpBody)
+                else:
+                	errorMessage = sharedResponse["error"]
+                	return llevameResponse.errorResponse("User already exists", 401)
+        else:
+        	return llevameResponse.errorResponse('Invalid fb_token', 400)

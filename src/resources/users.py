@@ -7,8 +7,7 @@ from managers import sharedServices
 from . import llevameResponse
 from managers.dataBaseManager import DataBaseManager
 from managers.authManager import Authorization
-
-
+import json
 import logging
 import sys
 
@@ -64,6 +63,8 @@ class UsersIdsCars(Resource):
     def post(self, userId):
         logging.info('POST: %s/%s/cars', prefix, userId)
         return 'POST request on ' + prefix + '/' +  str(userId) + '/cars'
+
+
 
 class UsersIdsCarsIds(Resource):
 
