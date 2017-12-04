@@ -210,7 +210,7 @@ class Account(Resource):
 
 			isDriver = body['isDriver']
 
-			sharedBody = request.json
+			sharedBody = body.copy()
 
 			if isDriver == True:
 				if not ('car' in body):
