@@ -246,7 +246,8 @@ class TripTentative(Resource):
             estimatedTripShared = estimatedTripSharedBody(user['sharedId'], body['start'], body['end'])
             sharedResponse = sharedServices.postToShared('/api/trips/estimate', estimatedTripShared, {})
             if sharedResponse['success'] == True:
-                responseData['cost'] = sharedResponse['data']['cost']['value']
+                tripCostValue = sharedResponse['data']['cost']['value']
+                responseData['cost'] = abs(tripCostValue)
             responseData.update(matrix)
             return llevameResponse.successResponse(responseData, 200)
             
@@ -299,18 +300,26 @@ class TripStatus(Resource):
                     driverUsername = driver['username']
                     road = trip['road'][driverUsername]
                     timeStarted = trip['time']
-
+                    
                     tripBodyShared = tripSharedBody(user['sharedId'], driver['sharedId'],road,timeStarted)
                     sharedResponse = sharedServices.postToShared('/api/trips',tripBodyShared,{})
                     if sharedResponse['success'] == False:
                         return llevameResponse.errorResponse('Error saving trip in server', 500)
 
-                    tripCost = sharedResponse['data']['trip']['cost']['value']
+                    tripCost = abs(sharedResponse['data']['trip']['cost']['value'])
+                    driverBalance = driver['balance']['value'] + tripCost
+                    userBalance = user['balance']['value'] + tripCost
+                    driver['balance']['value'] = driverBalance
+                    user['balance']['value'] = userBalance
                     tripSharedId = sharedResponse['data']['trip']['id'][0]
+
                     DataBaseManager().update('trips', str(trip["_id"]),{'status':newStatus, 'cost':tripCost, 'sharedId':tripSharedId})
+                    DataBaseManager().update('users', user["_id"], {'balance.value':userBalance})
+                    DataBaseManager().update('drivers', driver["_id"], {'balance.value':driverBalance})
+
                     PushNotificationManager().sendTripFinishedPush(trip["passenger"], tripId)
                     logging.info('PATCH: %s/status - trip finished', prefix)
-                    return llevameResponse.successResponse({'tripId':tripId, 'cost': tripCost},200)
+                    return llevameResponse.successResponse({'tripId':tripId, 'cost': tripCost, 'balance': driver['balance']},200)
 
                 if newStatus == TripStatusEnum.CANCELED:
                     # TODO: Define what to do if trip was in progress and was caneled

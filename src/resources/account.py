@@ -234,6 +234,10 @@ class Account(Resource):
 			if sharedResponse["success"] == True:
 				userSharedId = sharedResponse["data"]["user"]["id"]
 				body["sharedId"] = userSharedId
+				body["balance"] = { 
+					'currency' : 'ARS',
+					'value' : 0
+				}
 				if isDriver:
 					return self.signUpDriver(username, body)
 				else:
@@ -383,6 +387,10 @@ class FacebookUser(Resource):
                 if sharedResponse["success"] == True:
                 	userSharedId = sharedResponse["data"]["user"]["id"]
                 	signUpBody["sharedId"] = userSharedId
+                	signUpBody["balance"] = { 
+                		'currency' : 'ARS',
+                		'value' : 0
+                	}
                 	return Account().signUpPassenger(username, signUpBody)
                 else:
                 	errorMessage = sharedResponse["error"]
