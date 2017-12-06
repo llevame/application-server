@@ -38,7 +38,9 @@ class AccountMe(Resource):
                 return llevameResponse.errorResponse('Invalid user', 403)
 
             user.pop('_id')
-            user.pop('password')
+            if 'password' in user:
+            	user.pop('password')
+
             sharedResponse = sharedServices.getToShared("/api/users/" + str(user["sharedId"]), {})
             if sharedResponse["success"] == True:
             	userShared = sharedResponse["data"]["user"]
