@@ -16,7 +16,7 @@ decorator==4.0.10
 defer==1.0.4
 entrypoints==0.2.2
 fastimport==0.9.4
-Flask==0.12.2
+flask>=0.12.3
 Flask-RESTful==0.3.6
 gunicorn==19.7.1
 html5lib==0.999
