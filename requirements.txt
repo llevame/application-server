@@ -24,7 +24,7 @@ httplib2==0.9.1
 idna==2.0
 ipaddress==1.0.16
 itsdangerous==0.24
-Jinja2==2.8
+Jinja2>=2.10.1
 MarkupSafe==0.23
 virtualenv==15.1.0
 py==1.4.34
@@ -35,5 +35,5 @@ pytest-cov==2.5.1
 python-dateutil==2.6.1
 pytz==2014.10
 six==1.10.0
-urllib3==1.22
+urllib3>=1.23
 Werkzeug==0.12.2
