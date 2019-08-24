@@ -36,4 +36,4 @@ python-dateutil==2.6.1
 pytz==2014.10
 six==1.10.0
 urllib3>=1.23
-Werkzeug==0.12.2
+Werkzeug==0.15.3
